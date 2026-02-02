@@ -64,7 +64,10 @@ export async function registerRoutes(
       
       const response = await fetch(`${BASE_API_URL}?action=detail&detailPath=${encodeURIComponent(path)}`);
       const data = await response.json();
-      res.json(data);
+      
+      // Unwrap data if it's nested under a 'data' property
+      const finalData = data.data || data;
+      res.json(finalData);
     } catch (error) {
       console.error('Detail Proxy Error:', error);
       res.status(500).json({ message: "Failed to fetch movie details" });

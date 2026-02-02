@@ -8,7 +8,19 @@ const fetchCategory = async (category: string, page = 1) => {
   const finalUrl = `${url}?page=${page}`;
   const res = await fetch(finalUrl, { credentials: "include" });
   if (!res.ok) throw new Error("Failed to fetch movies");
-  return apiResponseSchema.parse(await res.json());
+  const data = await res.json();
+  // Unwrap data if it's nested under a 'data' property
+  const finalData = data.data || data;
+  
+  // Ensure we return the expected structure even if upstream is inconsistent
+  const items = Array.isArray(finalData.items) ? finalData.items : [];
+  const success = typeof finalData.success === 'boolean' ? finalData.success : true;
+  
+  return apiResponseSchema.parse({
+    ...finalData,
+    items,
+    success
+  });
 };
 
 // Hook for infinite scrolling categories
@@ -38,7 +50,9 @@ export function useSearchMovies(query: string) {
       const url = `${api.movies.search.path}?q=${encodeURIComponent(query)}`;
       const res = await fetch(url, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to search movies");
-      return apiResponseSchema.parse(await res.json());
+      const data = await res.json();
+      const finalData = data.data || data;
+      return apiResponseSchema.parse(finalData);
     },
     enabled: !!query && query.length > 2,
     staleTime: 1000 * 60 * 5, // Cache results for 5 mins
@@ -55,7 +69,9 @@ export function useMovieDetail(path: string | null) {
       const url = `${api.movies.detail.path}?path=${encodeURIComponent(path)}`;
       const res = await fetch(url, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to fetch movie details");
-      return movieDetailSchema.parse(await res.json());
+      const data = await res.json();
+      const finalData = data.data || data;
+      return movieDetailSchema.parse(finalData);
     },
     enabled: !!path,
   });
