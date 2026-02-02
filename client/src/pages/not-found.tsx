@@ -1,21 +1,24 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md mx-4">
-        <CardContent className="pt-6">
-          <div className="flex mb-4 gap-2">
-            <AlertCircle className="h-8 w-8 text-red-500" />
-            <h1 className="text-2xl font-bold text-gray-900">404 Page Not Found</h1>
-          </div>
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 text-center">
+      <div className="w-24 h-24 bg-destructive/10 rounded-full flex items-center justify-center mb-6">
+        <AlertTriangle className="w-12 h-12 text-destructive" />
+      </div>
+      
+      <h1 className="text-5xl font-display font-black text-white mb-4">404</h1>
+      <p className="text-xl text-white/60 mb-8 max-w-md">
+        Whoops! It looks like you've wandered into the void. The page you're looking for doesn't exist.
+      </p>
 
-          <p className="mt-4 text-sm text-gray-600">
-            Did you forget to add the page to the router?
-          </p>
-        </CardContent>
-      </Card>
+      <Link href="/">
+        <Button size="lg" className="bg-white text-black hover:bg-white/90 font-bold rounded-xl px-8">
+          Return Home
+        </Button>
+      </Link>
     </div>
   );
 }
