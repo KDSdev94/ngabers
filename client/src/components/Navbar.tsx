@@ -2,14 +2,14 @@ import { Link, useLocation } from "wouter";
 import { Search, Menu, X, Play } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useSearchMovies } from "@/hooks/use-movies";
-import { useDebounce } from "usehooks-ts";
+import { useDebounceValue } from "usehooks-ts";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const debouncedSearch = useDebounce(searchQuery, 500);
+  const [debouncedSearch] = useDebounceValue(searchQuery, 500);
   const [location] = useLocation();
 
   const { data: searchResults, isLoading: isSearching } = useSearchMovies(debouncedSearch);
