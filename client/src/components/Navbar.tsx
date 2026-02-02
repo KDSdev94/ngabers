@@ -10,7 +10,7 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch] = useDebounceValue(searchQuery, 500);
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
 
   const { data: searchResults, isLoading: isSearching } = useSearchMovies(debouncedSearch);
 
@@ -28,37 +28,53 @@ export function Navbar() {
   return (
     <>
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled || isMobileMenuOpen ? "bg-background/95 backdrop-blur-md border-b border-white/10" : "bg-gradient-to-b from-black/80 to-transparent"
-        }`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled || isMobileMenuOpen ? "bg-background/95 backdrop-blur-md border-b border-white/10" : "bg-gradient-to-b from-black/80 to-transparent"
+          }`}
       >
         <div className="container mx-auto px-4 h-16 md:h-20 flex items-center justify-between gap-4">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group cursor-pointer z-50">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform duration-300">
-              <Play className="w-4 h-4 md:w-5 md:h-5 text-white fill-current" />
-            </div>
-            <span className="text-xl md:text-2xl font-display font-bold tracking-tighter text-white">
-              Stream<span className="text-primary">X</span>
-            </span>
+            <img
+              src="/header.png"
+              alt="Ngabers Logo"
+              className="h-8 md:h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-300"
+            />
           </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
-            {["Home", "Movies", "Drama", "Anime"].map((item) => (
-              <Link 
-                key={item} 
-                href={item === "Home" ? "/" : `/category/${item.toLowerCase().replace(' ', '-')}`}
+            {[
+              { label: "Home", href: "/" },
+              { label: "Movies", href: "/category/indonesian-movies" },
+              { label: "K-Drama", href: "/category/kdrama" },
+              { label: "Drama Box", href: "/category/drama-box" },
+              { label: "Anime", href: "/category/anime" },
+              { label: "Genres", href: "/genres" },
+            ].map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
                 className="text-sm font-medium text-white/70 hover:text-white hover:text-shadow-glow transition-all"
               >
-                {item}
+                {item.label}
               </Link>
             ))}
           </nav>
 
           {/* Search Bar */}
           <div className="flex items-center gap-4 flex-1 md:flex-none justify-end">
-            <div className="relative group w-full max-w-[200px] md:max-w-[300px]">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (searchQuery.trim().length >= 2) {
+                  setLocation(`/search?q=${encodeURIComponent(searchQuery)}`);
+                  // Manual search query check to force close dropdown by blurring or resetting
+                  const input = e.currentTarget.querySelector('input');
+                  if (input) input.blur();
+                }
+              }}
+              className="relative group w-full max-w-[200px] md:max-w-[300px]"
+            >
               <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                 <Search className="w-4 h-4 text-white/50 group-focus-within:text-primary transition-colors" />
               </div>
@@ -69,7 +85,7 @@ export function Navbar() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full bg-secondary/50 border border-white/5 rounded-full py-2 pl-10 pr-4 text-sm text-white placeholder:text-white/30 focus:outline-none focus:bg-secondary focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all"
               />
-              
+
               {/* Search Results Dropdown */}
               <AnimatePresence>
                 {searchQuery.length > 2 && (
@@ -101,9 +117,11 @@ export function Navbar() {
                         ))}
                         {searchResults?.items?.length! > 5 && (
                           <div className="p-2 pt-0">
-                            <button className="w-full py-2 text-xs font-medium text-white/50 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors">
-                              View all results
-                            </button>
+                            <Link href={`/search?q=${encodeURIComponent(searchQuery)}`}>
+                              <button className="w-full py-2 text-xs font-medium text-white/50 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg transition-colors cursor-pointer">
+                                View all results
+                              </button>
+                            </Link>
                           </div>
                         )}
                       </div>
@@ -111,10 +129,10 @@ export function Navbar() {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </form>
 
             {/* Mobile Menu Toggle */}
-            <button 
+            <button
               className="md:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
@@ -126,28 +144,38 @@ export function Navbar() {
 
       {/* Mobile Menu */}
       <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="fixed top-16 left-0 right-0 bg-background border-b border-white/10 z-40 md:hidden overflow-hidden"
-          >
-            <nav className="flex flex-col p-4 gap-2">
-              {["Home", "Movies", "Drama", "Anime", "Trending"].map((item) => (
-                <Link 
-                  key={item} 
-                  href={item === "Home" ? "/" : `/category/${item.toLowerCase().replace(' ', '-')}`}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="px-4 py-3 rounded-xl hover:bg-white/5 text-white/80 hover:text-white font-medium transition-colors"
-                >
-                  {item}
-                </Link>
-              ))}
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {
+          isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="fixed top-16 left-0 right-0 bg-background border-b border-white/10 z-40 md:hidden overflow-hidden"
+            >
+              <nav className="flex flex-col p-4 gap-2">
+                {[
+                  { label: "Home", href: "/" },
+                  { label: "Movies", href: "/category/indonesian-movies" },
+                  { label: "K-Drama", href: "/category/kdrama" },
+                  { label: "Drama Box", href: "/category/drama-box" },
+                  { label: "Anime", href: "/category/anime" },
+                  { label: "Genres", href: "/genres" },
+                  { label: "Trending", href: "/category/trending" },
+                ].map((item) => (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="px-4 py-3 rounded-xl hover:bg-white/5 text-white/80 hover:text-white font-medium transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </nav>
+            </motion.div>
+          )
+        }
+      </AnimatePresence >
     </>
   );
 }

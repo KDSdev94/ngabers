@@ -11,7 +11,7 @@ export function VideoPlayer({ url }: VideoPlayerProps) {
 
   // Note: Most streaming APIs return an iframe URL. 
   // We need to ensure we handle it securely.
-  
+
   if (!url) return null;
 
   return (
@@ -33,16 +33,17 @@ export function VideoPlayer({ url }: VideoPlayerProps) {
 
       <iframe
         src={url}
-        className="w-full h-full"
+        className="w-full h-full border-0"
         allowFullScreen
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation"
         onLoad={() => setLoading(false)}
         onError={() => {
           setLoading(false);
           setError(true);
         }}
       />
-      
+
       {/* Cinematic Vignette */}
       <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] rounded-2xl" />
     </div>

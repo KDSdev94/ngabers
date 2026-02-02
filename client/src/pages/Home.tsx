@@ -1,74 +1,141 @@
 import { Navbar } from "@/components/Navbar";
 import { HeroSlider } from "@/components/HeroSlider";
 import { CategoryRow } from "@/components/CategoryRow";
+import { Footer } from "@/components/Footer";
 import { useMoviesCategory } from "@/hooks/use-movies";
 import { Loader2 } from "lucide-react";
 
 export default function Home() {
-  // Fetch a few categories for the homepage
+  // ... (lines 8-105 remain unchanged)
+  // Fetch all 9 categories for the homepage
   const { data: indonesianMovies, isLoading: loadingIndo } = useMoviesCategory("indonesian-movies");
-  const { data: kdrama, isLoading: loadingKdrama } = useMoviesCategory("kdrama");
+  const { data: trending, isLoading: loadingTrending } = useMoviesCategory("trending");
   const { data: anime, isLoading: loadingAnime } = useMoviesCategory("anime");
+  const { data: indonesianDrama, isLoading: loadingIndoDrama } = useMoviesCategory("indonesian-drama");
+  const { data: kdrama, isLoading: loadingKdrama } = useMoviesCategory("kdrama");
   const { data: shortTv, isLoading: loadingShortTv } = useMoviesCategory("short-tv");
+  const { data: adultComedy, isLoading: loadingAdultComedy } = useMoviesCategory("adult-comedy");
+  const { data: westernTv, isLoading: loadingWesternTv } = useMoviesCategory("western-tv");
+  const { data: indoDub, isLoading: loadingIndoDub } = useMoviesCategory("indo-dub");
+  const { data: dramaBox, isLoading: loadingDramaBox } = useMoviesCategory("drama-box-trending");
+  const { data: dbMustSees, isLoading: loadingDbMustSees } = useMoviesCategory("drama-box-must-sees");
+  const { data: dbGems, isLoading: loadingDbGems } = useMoviesCategory("drama-box-hidden-gems");
 
-  // Helper to extract items from infinite query pages
-  const getItems = (data: any) => data?.pages?.flatMap((page: any) => page.items) || [];
+  // Helper to extract items from query
+  const getItems = (data: any) => data?.items || [];
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-20">
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Navbar />
-      
+
       {/* Hero Section */}
       <HeroSlider />
 
       <div className="mt-[-80px] md:mt-[-120px] relative z-20 space-y-4 md:space-y-8">
         {/* Categories */}
         <div className="bg-gradient-to-t from-background via-background to-transparent pt-20 md:pt-32">
-          <CategoryRow 
-            title="Indonesian Movies" 
-            items={getItems(indonesianMovies)} 
-            isLoading={loadingIndo} 
+
+          {/* 2. Trending */}
+          <CategoryRow
+            title="Sedang Tren 🔥"
+            items={getItems(trending)}
+            isLoading={loadingTrending}
+            viewAllLink="/category/trending"
+          />
+          {/* 1. Film Indonesia (TOP) */}
+          <CategoryRow
+            title="Film Indonesia Lagi Ngetren"
+            items={getItems(indonesianMovies)}
+            isLoading={loadingIndo}
             viewAllLink="/category/indonesian-movies"
           />
-          
-          <CategoryRow 
-            title="Popular K-Dramas" 
-            items={getItems(kdrama)} 
+          {/* 3. Anime (THIRD) */}
+          <CategoryRow
+            title="Masuk ke Dunia Anime"
+            items={getItems(anime)}
+            isLoading={loadingAnime}
+            viewAllLink="/category/anime"
+          />
+          {/* 5. K-Drama */}
+          <CategoryRow
+            title="K-Drama Terbaru"
+            items={getItems(kdrama)}
             isLoading={loadingKdrama}
             viewAllLink="/category/kdrama"
           />
 
-          <CategoryRow 
-            title="Latest Anime" 
-            items={getItems(anime)} 
-            isLoading={loadingAnime}
-            viewAllLink="/category/anime"
+          {/* 4. Indonesian Drama */}
+          <CategoryRow
+            title="Drama Indonesia Terkini"
+            items={getItems(indonesianDrama)}
+            isLoading={loadingIndoDrama}
+            viewAllLink="/category/indonesian-drama"
+          />
+          {/* 9. Indo Dub */}
+          <CategoryRow
+            title="Tayangan Dub Indo Terbaik!"
+            items={getItems(indoDub)}
+            isLoading={loadingIndoDub}
+            viewAllLink="/category/indo-dub"
           />
 
-          <CategoryRow 
-            title="Short TV Series" 
-            items={getItems(shortTv)} 
+          {/* New Drama Box Category */}
+          <CategoryRow
+            title="Drama Box Specials ⭐"
+            items={getItems(dramaBox)}
+            isLoading={loadingDramaBox}
+            viewAllLink="/category/drama-box"
+          />
+
+
+
+          {/* Drama Box Must Sees */}
+          <CategoryRow
+            title="Drama Box: Recommended for You ✨"
+            items={getItems(dbMustSees)}
+            isLoading={loadingDbMustSees}
+            viewAllLink="/category/drama-box-must-sees"
+          />
+
+          {/* Drama Box Hidden Gems */}
+          <CategoryRow
+            title="Drama Box: Hidden Gems 💎"
+            items={getItems(dbGems)}
+            isLoading={loadingDbGems}
+            viewAllLink="/category/drama-box-hidden-gems"
+          />
+
+
+
+
+          {/* 6. Short TV */}
+          <CategoryRow
+            title="Hot Short TV"
+            items={getItems(shortTv)}
             isLoading={loadingShortTv}
             viewAllLink="/category/short-tv"
           />
+
+          {/* 7. Adult Comedy */}
+          <CategoryRow
+            title="Canda Dewasa"
+            items={getItems(adultComedy)}
+            isLoading={loadingAdultComedy}
+            viewAllLink="/category/adult-comedy"
+          />
+
+          {/* 8. Western TV */}
+          <CategoryRow
+            title="Western TV"
+            items={getItems(westernTv)}
+            isLoading={loadingWesternTv}
+            viewAllLink="/category/western-tv"
+          />
+
+
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="container mx-auto px-4 pt-10 pb-6 border-t border-white/5 text-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="text-2xl font-display font-bold tracking-tighter text-white">
-            Stream<span className="text-primary">X</span>
-          </div>
-          <p className="text-white/40 text-sm max-w-md mx-auto">
-            Premium streaming experience for movies, dramas, and anime. 
-            All content is provided by non-affiliated third parties.
-          </p>
-          <div className="text-white/20 text-xs mt-4">
-            © 2024 StreamX. All rights reserved.
-          </div>
-        </div>
-      </footer>
+      <Footer variant="full" />
     </div>
   );
 }
