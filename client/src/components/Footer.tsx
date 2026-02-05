@@ -89,7 +89,7 @@ export function Footer({ variant = 'full' }: FooterProps) {
                             <ul className="space-y-2">
                                 {[
                                     { name: 'Instagram', url: 'https://www.instagram.com/kdwiisap_/' },
-                                    { name: 'TikTok', url: '#' },
+                                    { name: 'TikTok', url: 'https://www.tiktok.com/@veyvy4?_r=1&_t=ZT-93fNRv7CAyj' },
                                     { name: 'Facebook', url: '#' },
                                 ].map(item => (
                                     <li key={item.name}>
