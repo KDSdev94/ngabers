@@ -12,7 +12,7 @@ export function MovieCard({ movie, priority = false }: MovieCardProps) {
   return (
     <Link href={`/detail?path=${encodeURIComponent(movie.detailPath)}`}>
       <motion.div
-        className="group relative flex-shrink-0 w-[160px] md:w-[220px] aspect-[2/3] rounded-2xl overflow-hidden cursor-pointer bg-card shadow-lg shadow-black/20 border border-white/5"
+        className="group relative w-full aspect-[2/3] rounded-2xl overflow-hidden cursor-pointer bg-card shadow-lg shadow-black/20 border border-white/5"
         whileHover={{ y: -8, scale: 1.02 }}
         transition={{ duration: 0.2 }}
         layout={priority}
@@ -36,8 +36,8 @@ export function MovieCard({ movie, priority = false }: MovieCardProps) {
           <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
 
             {/* Play Button */}
-            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center mb-3 shadow-lg shadow-primary/40 mx-auto scale-0 group-hover:scale-100 transition-transform duration-300 delay-75">
-              <Play className="w-5 h-5 text-white fill-current ml-0.5" />
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary flex items-center justify-center mb-3 shadow-lg shadow-primary/40 mx-auto scale-0 group-hover:scale-100 transition-transform duration-300 delay-75">
+              <Play className="w-4 h-4 md:w-5 md:h-5 text-white fill-current ml-0.5" />
             </div>
 
             <h3 className="text-white font-bold text-lg leading-tight line-clamp-2 mb-1 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] text-center">
@@ -73,7 +73,7 @@ export function MovieCard({ movie, priority = false }: MovieCardProps) {
 
 export function MovieCardSkeleton() {
   return (
-    <div className="w-[160px] md:w-[220px] aspect-[2/3] rounded-2xl bg-secondary animate-pulse relative overflow-hidden">
+    <div className="w-full aspect-[2/3] rounded-2xl bg-secondary animate-pulse relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 translate-x-[-100%] animate-shimmer" />
     </div>
   );

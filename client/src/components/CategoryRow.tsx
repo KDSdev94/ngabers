@@ -41,7 +41,9 @@ export function CategoryRow({ title, items, isLoading, viewAllLink }: CategoryRo
         {isLoading ? (
           <div className="flex gap-4 md:gap-6 overflow-hidden">
             {Array(6).fill(0).map((_, i) => (
-              <MovieCardSkeleton key={i} />
+              <div key={i} className="w-[140px] md:w-[200px] flex-shrink-0">
+                <MovieCardSkeleton />
+              </div>
             ))}
           </div>
         ) : items?.length > 0 ? (
@@ -52,27 +54,27 @@ export function CategoryRow({ title, items, isLoading, viewAllLink }: CategoryRo
                 nextEl: `.${nextElClass}`,
                 prevEl: `.${prevElClass}`,
               }}
-              spaceBetween={12}
+              spaceBetween={16}
               slidesPerView={2.2}
-              slidesPerGroup={2}
+              slidesPerGroup={1}
               breakpoints={{
                 640: {
                   slidesPerView: 3.2,
-                  slidesPerGroup: 3,
+                  slidesPerGroup: 2,
                   spaceBetween: 16
                 },
                 1024: {
-                  slidesPerView: 5,
-                  slidesPerGroup: 5,
+                  slidesPerView: 5.2,
+                  slidesPerGroup: 3,
                   spaceBetween: 20
                 },
                 1280: {
-                  slidesPerView: 6,
-                  slidesPerGroup: 6,
+                  slidesPerView: 6.2,
+                  slidesPerGroup: 4,
                   spaceBetween: 24
                 },
               }}
-              className="rounded-xl"
+              className="!overflow-visible"
             >
               {items.map((movie) => (
                 <SwiperSlide key={movie.id}>

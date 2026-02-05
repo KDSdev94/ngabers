@@ -127,9 +127,9 @@ export function Footer({ variant = 'full' }: FooterProps) {
                                 whileHover={{ scale: 1.1 }}
                                 whileTap={{ scale: 0.9 }}
                                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                                className="fixed bottom-8 right-8 w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-2xl shadow-primary/40 z-[100] border border-white/20 hover:bg-primary/90 transition-colors"
+                                className="fixed bottom-6 right-6 md:bottom-8 md:right-8 w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary text-white flex items-center justify-center shadow-2xl shadow-primary/40 z-[100] border border-white/20 hover:bg-primary/90 transition-colors"
                             >
-                                <ChevronUp className="w-6 h-6" />
+                                <ChevronUp className="w-5 h-5 md:w-6 md:h-6" />
                             </motion.button>
                         )}
                     </AnimatePresence>

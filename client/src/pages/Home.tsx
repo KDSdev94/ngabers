@@ -45,7 +45,7 @@ export default function Home() {
 
       <div className="mt-[-80px] md:mt-[-120px] relative z-20 space-y-4 md:space-y-8">
         {/* Categories */}
-        <div className="bg-gradient-to-t from-background via-background to-transparent pt-20 md:pt-32">
+        <div className="bg-gradient-to-t from-background via-background to-transparent pt-24 md:pt-32 space-y-2 md:space-y-6">
           {/* 1. Trending */}
           <CategoryRow
             title="Sedang Tren 🔥"
