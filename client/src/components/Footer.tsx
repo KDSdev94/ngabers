@@ -88,7 +88,7 @@ export function Footer({ variant = 'full' }: FooterProps) {
                             <h4 className="text-[11px] font-bold text-white/80 uppercase tracking-[0.2em]">Social Media</h4>
                             <ul className="space-y-2">
                                 {[
-                                    { name: 'Instagram', url: '#' },
+                                    { name: 'Instagram', url: 'https://www.instagram.com/kdwiisap_/' },
                                     { name: 'TikTok', url: '#' },
                                     { name: 'Facebook', url: '#' },
                                 ].map(item => (

@@ -35,7 +35,7 @@ export default function Category() {
   const items = data?.items || [];
   const hasMore = data?.hasMore || false;
   const displayTitle = formatTitle(categoryName);
-  const description = `Explore our extensive collection of ${displayTitle.toLowerCase()}, updated daily with the highest quality content available.`;
+  const description = `Jelajahi koleksi ${displayTitle.toLowerCase()} kami yang lengkap, diperbarui setiap hari dengan konten berkualitas tinggi.`;
 
   const handlePageChange = (newPage: number) => {
     // Force a full page refresh to ensure data is updated correctly
