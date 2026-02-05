@@ -1,5 +1,5 @@
 import { storage } from "./storage";
-import { api as apiRoutes } from "@shared/routes";
+import { api as apiRoutes } from "../shared/routes";
 import { z } from "zod";
 
 const BASE_API_URL = "https://zeldvorik.ru/apiv3/api.php";

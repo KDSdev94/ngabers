@@ -6,7 +6,7 @@ export const api = {
     // General endpoint for categories (trending, indonesian-movies, etc.)
     list: {
       method: 'GET' as const,
-      path: '/api/movies/:category', 
+      path: '/api/movies/:category',
       input: z.object({
         page: z.coerce.number().default(1).optional(),
       }).optional(),

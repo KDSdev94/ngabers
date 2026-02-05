@@ -2,7 +2,7 @@ import { db } from "./firebase";
 import {
   type InsertWatchHistory,
   type WatchHistoryItem
-} from "@shared/schema";
+} from "../shared/schema";
 
 export interface IStorage {
   addToHistory(item: InsertWatchHistory): Promise<WatchHistoryItem>;
