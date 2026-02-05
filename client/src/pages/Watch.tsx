@@ -1,5 +1,6 @@
 import { useLocation } from "wouter";
 import { useMovieDetail } from "@/hooks/use-movies";
+import { useHistory } from "@/hooks/use-history";
 import { Navbar } from "@/components/Navbar";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { Footer } from "@/components/Footer";
@@ -13,6 +14,8 @@ import { useEffect, useState, useMemo } from "react";
 export default function Watch() {
     const [location, setLocation] = useLocation();
     const [autoNext, setAutoNext] = useState(true);
+    const { addToHistory } = useHistory();
+
 
     // Get current query params reactively
     const searchParams = new URLSearchParams(window.location.search);
@@ -29,10 +32,8 @@ export default function Watch() {
     const { prevEp, nextEp } = useMemo(() => {
         if (!movie || !movie.seasons || !currentUrl) return { prevEp: null, nextEp: null };
 
-        // Helper to normalize URLs for comparison
         const normalize = (u: string) => {
             try {
-                // Remove protocol and trailing slashes/hashes
                 return u.replace(/^https?:\/\//, '').replace(/\/+$/, '').split('#')[0];
             } catch (e) {
                 return u;
@@ -41,7 +42,6 @@ export default function Watch() {
 
         const normalizedCurrent = normalize(decodeURIComponent(currentUrl));
 
-        // Flatten all episodes across all seasons
         const allEpisodes = movie.seasons.flatMap((s: any) =>
             s.episodes.map((ep: any) => ({
                 ...ep,
@@ -61,7 +61,21 @@ export default function Watch() {
         };
     }, [movie, currentUrl]);
 
+    // Save to history when movie data or the current episode URL is available
+    useEffect(() => {
+        if (title && (currentUrl || path)) {
+            addToHistory({
+                id: path || currentUrl || "unknown",
+                title: title,
+                poster: poster || "",
+                path: path || undefined,
+                epTitle: epTitle || undefined
+            });
+        }
+    }, [title, currentUrl, path, poster, epTitle]);
+
     if (!currentUrl) {
+
         setLocation("/");
         return null;
     }

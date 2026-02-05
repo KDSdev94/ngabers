@@ -1,43 +1,40 @@
-import { db } from "./db";
+import { db } from "./firebase";
 import {
-  watchHistory,
   type InsertWatchHistory,
   type WatchHistoryItem
 } from "@shared/schema";
 
 export interface IStorage {
   addToHistory(item: InsertWatchHistory): Promise<WatchHistoryItem>;
+  getHistory(): Promise<WatchHistoryItem[]>;
 }
 
-export class MemStorage implements IStorage {
-  private history: Map<number, WatchHistoryItem>;
-  private currentId: number;
-
-  constructor() {
-    this.history = new Map();
-    this.currentId = 1;
-  }
+export class FirestoreStorage implements IStorage {
+  private collection = db.collection("watch_history");
 
   async addToHistory(item: InsertWatchHistory): Promise<WatchHistoryItem> {
-    const entry: WatchHistoryItem = {
+    const docRef = await this.collection.add({
       ...item,
-      id: this.currentId++,
-      poster: item.poster ?? null
-    };
-    this.history.set(entry.id, entry);
-    return entry;
+      watchedAt: item.watchedAt || Math.floor(Date.now() / 1000)
+    });
+    const doc = await docRef.get();
+    const data = doc.data()!;
+    return {
+      id: doc.id,
+      ...data
+    } as any;
+  }
+
+  async getHistory(): Promise<WatchHistoryItem[]> {
+    const snapshot = await this.collection.orderBy("watchedAt", "desc").limit(50).get();
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as any;
   }
 }
 
-export class DatabaseStorage implements IStorage {
-  async addToHistory(item: InsertWatchHistory): Promise<WatchHistoryItem> {
-    if (!db) throw new Error("Database not initialized");
-    const [entry] = await db.insert(watchHistory).values(item).returning();
-    return entry;
-  }
-}
+export const storage = new FirestoreStorage();
 
-// Choose storage based on availability of database
-export const storage = db ? new DatabaseStorage() : new MemStorage();
+console.log(`[Storage] Initialized with Firestore storage`);
 
-console.log(`[Storage] Initialized with ${db ? "PostgreSQL" : "In-Memory"} storage`);
