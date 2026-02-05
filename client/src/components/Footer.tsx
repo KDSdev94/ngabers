@@ -106,7 +106,7 @@ export function Footer({ variant = 'full' }: FooterProps) {
             <div className="bg-black/40 py-5 border-t border-white/5">
                 <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
                     <p className="text-[11px] text-white uppercase tracking-[0.1em] font-medium">
-                        Copyright © 2026 by Ngabers. All Rights Reserved.
+                        © 2026 Ngabers. Streaming Film & Series Gratis.
                     </p>
 
                     <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-2">
