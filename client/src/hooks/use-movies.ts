@@ -52,6 +52,18 @@ export function useMoviesCategory(category: string) {
   });
 }
 
+// Hook for categories with explicit pagination
+export function useMoviesCategoryPaged(category: string, page: number) {
+  const safeCategory = typeof category === 'string' ? category : 'trending';
+
+  return useQuery({
+    queryKey: ["movies", "list", safeCategory, page],
+    queryFn: () => fetchCategory(safeCategory, page),
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+
 // Hook for infinite scrolling categories (specifically for Category page)
 export function useInfiniteMoviesCategory(category: string) {
   const safeCategory = typeof category === 'string' ? category : 'trending';

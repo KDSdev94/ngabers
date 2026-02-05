@@ -1,21 +1,19 @@
-import { pgTable, text, serial, integer, boolean, jsonb } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// We don't strictly need a database for this proxy app, but we'll set up a simple 
-// schema for potential future features like favorites or watch history.
-export const watchHistory = pgTable("watch_history", {
-  id: serial("id").primaryKey(),
-  movieId: text("movie_id").notNull(),
-  title: text("title").notNull(),
-  poster: text("poster"),
-  detailPath: text("detail_path").notNull(),
-  watchedAt: integer("watched_at").notNull(), // timestamp
+// We'll use Firestore for watch history.
+export const watchHistorySchema = z.object({
+  id: z.string(),
+  movieId: z.string(),
+  title: z.string(),
+  poster: z.string().nullable(),
+  detailPath: z.string(),
+  watchedAt: z.number(), // timestamp
 });
 
-export const insertWatchHistorySchema = createInsertSchema(watchHistory).omit({ id: true });
+export const insertWatchHistorySchema = watchHistorySchema.omit({ id: true });
 export type InsertWatchHistory = z.infer<typeof insertWatchHistorySchema>;
-export type WatchHistoryItem = typeof watchHistory.$inferSelect;
+export type WatchHistoryItem = z.infer<typeof watchHistorySchema>;
+
 
 // --- External API Types ---
 

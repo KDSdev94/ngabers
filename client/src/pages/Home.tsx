@@ -8,20 +8,32 @@ import { Loader2 } from "lucide-react";
 export default function Home() {
   // ... (lines 8-105 remain unchanged)
   // Fetch all 9 categories for the homepage
-  const { data: indonesianMovies, isLoading: loadingIndo } = useMoviesCategory("indonesian-movies");
-  const { data: trending, isLoading: loadingTrending } = useMoviesCategory("trending");
+  const { data: indonesianMovies, isLoading: loadingIndo } =
+    useMoviesCategory("indonesian-movies");
+  const { data: trending, isLoading: loadingTrending } =
+    useMoviesCategory("trending");
   const { data: anime, isLoading: loadingAnime } = useMoviesCategory("anime");
-  const { data: indonesianDrama, isLoading: loadingIndoDrama } = useMoviesCategory("indonesian-drama");
-  const { data: kdrama, isLoading: loadingKdrama } = useMoviesCategory("kdrama");
-  const { data: shortTv, isLoading: loadingShortTv } = useMoviesCategory("short-tv");
-  const { data: adultComedy, isLoading: loadingAdultComedy } = useMoviesCategory("adult-comedy");
-  const { data: westernTv, isLoading: loadingWesternTv } = useMoviesCategory("western-tv");
-  const { data: indoDub, isLoading: loadingIndoDub } = useMoviesCategory("indo-dub");
-  const { data: dramaBox, isLoading: loadingDramaBox } = useMoviesCategory("drama-box-trending");
-  const { data: dbMustSees, isLoading: loadingDbMustSees } = useMoviesCategory("drama-box-must-sees");
-  const { data: dbGems, isLoading: loadingDbGems } = useMoviesCategory("drama-box-hidden-gems");
+  const { data: indonesianDrama, isLoading: loadingIndoDrama } =
+    useMoviesCategory("indonesian-drama");
+  const { data: kdrama, isLoading: loadingKdrama } =
+    useMoviesCategory("kdrama");
+  const { data: shortTv, isLoading: loadingShortTv } =
+    useMoviesCategory("short-tv");
+  const { data: adultComedy, isLoading: loadingAdultComedy } =
+    useMoviesCategory("adult-comedy");
+  const { data: westernTv, isLoading: loadingWesternTv } =
+    useMoviesCategory("western-tv");
+  const { data: indoDub, isLoading: loadingIndoDub } =
+    useMoviesCategory("indo-dub");
+  const { data: dramaBox, isLoading: loadingDramaBox } =
+    useMoviesCategory("drama-box-trending");
+  const { data: dbMustSees, isLoading: loadingDbMustSees } = useMoviesCategory(
+    "drama-box-must-sees",
+  );
+  const { data: dbGems, isLoading: loadingDbGems } = useMoviesCategory(
+    "drama-box-hidden-gems",
+  );
 
-  // Helper to extract items from query
   const getItems = (data: any) => data?.items || [];
 
   return (
@@ -34,15 +46,14 @@ export default function Home() {
       <div className="mt-[-80px] md:mt-[-120px] relative z-20 space-y-4 md:space-y-8">
         {/* Categories */}
         <div className="bg-gradient-to-t from-background via-background to-transparent pt-20 md:pt-32">
-
-          {/* 2. Trending */}
+          {/* 1. Trending */}
           <CategoryRow
             title="Sedang Tren 🔥"
             items={getItems(trending)}
             isLoading={loadingTrending}
             viewAllLink="/category/trending"
           />
-          {/* 1. Film Indonesia (TOP) */}
+          {/* 2. Film Indonesia (TOP) */}
           <CategoryRow
             title="Film Indonesia Lagi Ngetren"
             items={getItems(indonesianMovies)}
@@ -51,20 +62,20 @@ export default function Home() {
           />
           {/* 3. Anime (THIRD) */}
           <CategoryRow
-            title="Masuk ke Dunia Anime"
+            title="Masuk ke Dunia Animasi"
             items={getItems(anime)}
             isLoading={loadingAnime}
             viewAllLink="/category/anime"
           />
-          {/* 5. K-Drama */}
+          {/* 4. K-Drama */}
           <CategoryRow
-            title="K-Drama Terbaru"
+            title="Drakor Terbaru"
             items={getItems(kdrama)}
             isLoading={loadingKdrama}
             viewAllLink="/category/kdrama"
           />
 
-          {/* 4. Indonesian Drama */}
+          {/* 5. Indonesian Drama */}
           <CategoryRow
             title="Drama Indonesia Terkini"
             items={getItems(indonesianDrama)}
@@ -87,8 +98,6 @@ export default function Home() {
             viewAllLink="/category/drama-box"
           />
 
-
-
           {/* Drama Box Must Sees */}
           <CategoryRow
             title="Drama Box: Recommended for You ✨"
@@ -105,12 +114,9 @@ export default function Home() {
             viewAllLink="/category/drama-box-hidden-gems"
           />
 
-
-
-
           {/* 6. Short TV */}
           <CategoryRow
-            title="Hot Short TV"
+            title="Hot TV"
             items={getItems(shortTv)}
             isLoading={loadingShortTv}
             viewAllLink="/category/short-tv"
@@ -131,8 +137,6 @@ export default function Home() {
             isLoading={loadingWesternTv}
             viewAllLink="/category/western-tv"
           />
-
-
         </div>
       </div>
       <Footer variant="full" />

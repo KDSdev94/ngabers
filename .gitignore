@@ -6,5 +6,5 @@ dist/
 *.bin
 bun.lockb
 package-lock.json
-firebase.json
-vercel.json
+
+.vercel

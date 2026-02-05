@@ -50,6 +50,7 @@ export function Navbar() {
               { label: "Drama Box", href: "/category/drama-box" },
               { label: "Anime", href: "/category/anime" },
               { label: "Genres", href: "/genres" },
+              { label: "History", href: "/history" },
             ].map((item) => (
               <Link
                 key={item.label}
@@ -160,7 +161,9 @@ export function Navbar() {
                   { label: "Drama Box", href: "/category/drama-box" },
                   { label: "Anime", href: "/category/anime" },
                   { label: "Genres", href: "/genres" },
+                  { label: "History", href: "/history" },
                   { label: "Trending", href: "/category/trending" },
+
                 ].map((item) => (
                   <Link
                     key={item.label}

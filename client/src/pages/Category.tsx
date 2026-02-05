@@ -1,12 +1,13 @@
-import { useParams } from "wouter";
+import { useMemo } from "react";
+import { useParams, useLocation } from "wouter";
+
 import { Navbar } from "@/components/Navbar";
-import { useInfiniteMoviesCategory } from "@/hooks/use-movies";
+import { useMoviesCategoryPaged } from "@/hooks/use-movies";
 import { MovieCard, MovieCardSkeleton } from "@/components/MovieCard";
 import { Footer } from "@/components/Footer";
-import { Loader2 } from "lucide-react";
-import { useEffect } from "react";
-import { useInView } from "react-intersection-observer";
-import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 // Helper to format category/genre slug to title
 const formatTitle = (slug: string) => {
@@ -18,28 +19,79 @@ const formatTitle = (slug: string) => {
 
 export default function Category() {
   const { name } = useParams<{ name?: string }>();
+  const [location, setLocation] = useLocation();
+
+  // Get current page from URL or default to 1
+  // We use location as a dependency to ensure rerender when query string changes
+  const currentPage = useMemo(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    return parseInt(searchParams.get("page") || "1", 10);
+  }, [window.location.search, location]);
 
   const categoryName = name || "trending";
+  const { data, isLoading, isFetching } = useMoviesCategoryPaged(categoryName, currentPage);
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading
-  } = useInfiniteMoviesCategory(categoryName);
 
-  const { ref, inView } = useInView();
-
-  useEffect(() => {
-    if (inView && hasNextPage) {
-      fetchNextPage();
-    }
-  }, [inView, hasNextPage, fetchNextPage]);
-
-  const items = data?.pages?.flatMap(page => page.items) || [];
+  const items = data?.items || [];
+  const hasMore = data?.hasMore || false;
   const displayTitle = formatTitle(categoryName);
   const description = `Explore our extensive collection of ${displayTitle.toLowerCase()}, updated daily with the highest quality content available.`;
+
+  const handlePageChange = (newPage: number) => {
+    // Force a full page refresh to ensure data is updated correctly
+    const params = new URLSearchParams(window.location.search);
+    params.set("page", newPage.toString());
+    window.location.href = `${window.location.pathname}?${params.toString()}`;
+  };
+
+
+  // Generate page numbers to show (1, 2, 3 ... last)
+  // Since we don't know total pages from API (only hasMore), we'll do Simple Prev/Next or limited range
+  const renderPagination = () => {
+    if (items.length === 0 && !isLoading) return null;
+
+    return (
+      <div className="flex flex-col items-center gap-6 py-16">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="outline"
+            size="icon"
+            disabled={currentPage <= 1 || isFetching}
+            onClick={() => handlePageChange(currentPage - 1)}
+            className="rounded-xl bg-white/5 border-white/10 hover:bg-primary hover:text-white transition-all duration-300 disabled:opacity-20"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </Button>
+
+          <div className="flex items-center gap-2 px-6 py-2 bg-white/5 rounded-2xl border border-white/10 shadow-inner">
+            <span className="text-white/40 text-xs font-black uppercase tracking-widest">Page</span>
+            <span className="text-primary text-lg font-black">{currentPage}</span>
+          </div>
+
+          <Button
+            variant="outline"
+            size="icon"
+            disabled={!hasMore || isFetching}
+            onClick={() => handlePageChange(currentPage + 1)}
+            className="rounded-xl bg-white/5 border-white/10 hover:bg-primary hover:text-white transition-all duration-300 disabled:opacity-20"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </Button>
+        </div>
+
+        {isFetching && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex items-center gap-2 text-primary/60 text-xs font-bold uppercase tracking-[0.2em]"
+          >
+            <Loader2 className="w-3 h-3 animate-spin" />
+            Synchronizing...
+          </motion.div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -49,53 +101,66 @@ export default function Category() {
       <div className="relative pt-32 pb-12 md:pb-20 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full scale-150 translate-y-1/2 opacity-20 pointer-events-none" />
         <div className="container mx-auto relative z-10">
-          <h1 className="text-4xl md:text-6xl font-display font-black text-white mb-4 tracking-tight">
-            {displayTitle}
-          </h1>
-          <div className="h-1.5 w-24 bg-primary rounded-full" />
-          <p className="mt-4 text-white/60 text-lg max-w-2xl">
-            {description}
-          </p>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-4xl md:text-6xl font-display font-black text-white mb-4 tracking-tight">
+              {displayTitle}
+            </h1>
+            <div className="h-1.5 w-24 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary),0.5)]" />
+            <p className="mt-6 text-white/60 text-lg max-w-2xl leading-relaxed">
+              {description}
+            </p>
+          </motion.div>
         </div>
       </div>
 
       {/* Grid */}
-      <div className="container mx-auto px-4">
-        {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-8">
-            {Array(12).fill(0).map((_, i) => (
-              <MovieCardSkeleton key={i} />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-8">
-            {items.map((movie, index) => (
-              <motion.div
-                key={`${movie.id} -${index} `}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index % 10 * 0.05 }}
-              >
-                <MovieCard movie={movie} />
-              </motion.div>
-            ))}
-          </div>
-        )}
+      <div className="container mx-auto px-4 flex-1">
+        <AnimatePresence mode="wait">
+          {isLoading ? (
+            <motion.div
+              key="loader"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-8"
+            >
+              {Array(18).fill(0).map((_, i) => (
+                <MovieCardSkeleton key={i} />
+              ))}
+            </motion.div>
+          ) : (
+            <motion.div
+              key={currentPage}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.4 }}
+              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-8"
+            >
+              {items.map((movie, index) => (
+                <motion.div
+                  key={`${movie.id}-${index}`}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: (index % 12) * 0.03 }}
+                >
+                  <MovieCard movie={movie} />
+                </motion.div>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Load More Trigger */}
-        <div ref={ref} className="w-full py-12 flex justify-center">
-          {isFetchingNextPage && (
-            <div className="flex items-center gap-2 text-primary">
-              <Loader2 className="w-6 h-6 animate-spin" />
-              <span className="font-medium">Loading more...</span>
-            </div>
-          )}
-          {!hasNextPage && items.length > 0 && (
-            <div className="text-white/30 text-sm font-medium">You've reached the end</div>
-          )}
-        </div>
+        {/* Numerical Pagination */}
+        {renderPagination()}
       </div>
+
       <Footer variant="full" />
     </div>
   );
 }
+
