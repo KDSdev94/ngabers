@@ -13,9 +13,10 @@ interface CategoryRowProps {
   items: MovieItem[];
   isLoading?: boolean;
   viewAllLink?: string;
+  icon?: React.ReactNode;
 }
 
-export function CategoryRow({ title, items, isLoading, viewAllLink }: CategoryRowProps) {
+export function CategoryRow({ title, items, isLoading, viewAllLink, icon }: CategoryRowProps) {
   // Sanitize title for use in CSS selectors (remove special chars like !)
   const sanitizedId = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   const prevElClass = `swiper-prev-${sanitizedId}`;
@@ -26,7 +27,8 @@ export function CategoryRow({ title, items, isLoading, viewAllLink }: CategoryRo
       <div className="container mx-auto px-4 mb-4 md:mb-6">
         <div className="flex items-center justify-between gap-4 mb-2 md:mb-3">
           <div className="flex-1 min-w-0">
-            <h2 className="text-xl md:text-3xl font-display font-bold text-white truncate md:whitespace-normal leading-tight">
+            <h2 className="text-xl md:text-3xl font-display font-bold text-white truncate md:whitespace-normal leading-tight flex items-center gap-3">
+              {icon && <span className="text-primary">{icon}</span>}
               {title}
             </h2>
           </div>

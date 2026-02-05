@@ -105,7 +105,7 @@ export function Footer({ variant = 'full' }: FooterProps) {
             {/* Bottom Credits Section - PINNED TO BOTTOM */}
             <div className="bg-black/40 py-5 border-t border-white/5">
                 <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
-                    <p className="text-[11px] text-white/20 uppercase tracking-[0.1em] font-medium">
+                    <p className="text-[11px] text-white uppercase tracking-[0.1em] font-medium">
                         Copyright © 2026 by Ngabers. All Rights Reserved.
                     </p>
 

@@ -18,16 +18,24 @@ const fetchCategory = async (category: string, page = 1): Promise<ApiResponse> =
     const finalData = data?.data || data || {};
 
     // Ensure we return the expected structure even if upstream is inconsistent
-    const items = Array.isArray(finalData?.items) ? finalData.items.map((item: any) => ({
-      id: String(item?.id || Math.random()),
+    const rawItems = Array.isArray(finalData?.items) ? finalData.items.map((item: any) => ({
+      id: String(item?.id || Math.random().toString(36).substr(2, 9)),
       title: String(item?.title || "Unknown Title"),
       poster: String(item?.poster || ""),
       rating: Number(item?.rating || 0),
       year: String(item?.year || ""),
       type: String(item?.type || "movie"),
       genre: String(item?.genre || ""),
+      description: String(item?.description || ""),
       detailPath: String(item?.detailPath || ""),
     })) : [];
+
+    // Deduplicate items based on ID to prevent React key errors
+    const items = rawItems.filter((item: any, index: number, self: any[]) =>
+      index === self.findIndex((t: any) => (
+        t.id === item.id
+      ))
+    );
 
     return {
       success: !!finalData?.success,

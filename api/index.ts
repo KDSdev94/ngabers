@@ -28,6 +28,7 @@ async function fetchFromDramaBox(endpoint: string, page: number = 1) {
                 year: "",
                 type: "tv",
                 genre: item.tags?.join(", ") || "",
+                description: item.introduction || "",
                 detailPath: `db-${item.id}`
             })),
             page: data.meta?.pagination?.page || page,
@@ -93,6 +94,7 @@ async function fetchDramaBoxDetail(id: string) {
             type: "tv",
             rating: Number(finalRating.toFixed(1)),
             year: drama.year || (new Date().getFullYear()).toString(),
+            country: drama.area || drama.country || "Asia",
             detailPath: `db-${drama.id || id}`,
             seasons: [{ name: "Season 1", season: "1", episodes: episodes }]
         };
@@ -132,6 +134,7 @@ async function fetchFromBotraiki(endpoint: string, page: number = 1) {
                     year: item.shelfTime?.split(' ')[0]?.split('-')[0] || "",
                     type: "tv",
                     genre: item.tags?.join(", ") || item.tagNames?.join(", ") || "",
+                    description: item.introduction || "",
                     detailPath: `bt-${item.bookId || item.id}`,
                 };
             }),
@@ -204,6 +207,7 @@ async function fetchBotraikiDetail(bookId: string) {
             type: "tv",
             rating: Number(rating.toFixed(1)),
             year: bookInfo.shelfTime?.split(' ')[0]?.split('-')[0] || "",
+            country: bookInfo.area || "International",
             detailPath: `bt-${bookInfo.bookId || bookId}`,
             seasons: episodes.length > 0 ? [{ name: "Season 1", season: "1", episodes: episodes }] : [],
         };
@@ -289,7 +293,19 @@ async function handleApiRequest(path: string, method: string, query: any, body: 
         if (!resp.ok) throw new Error("Detail fetch failed");
         const data = await resp.json();
         const finalData = data.data || data;
-        if (finalData && !finalData.rating) finalData.rating = "8.9";
+        if (finalData) {
+            // Ensure ID and detailPath exist for schema validation
+            if (!finalData.id) finalData.id = detailPath.split('/').pop() || Math.random().toString(36).substring(7);
+            if (!finalData.detailPath) finalData.detailPath = detailPath;
+
+            // Fallbacks for metadata
+            if (!finalData.rating) finalData.rating = "8.9";
+
+
+            // Aggressive Country/Region mapping
+            if (finalData.area && !finalData.country) finalData.country = finalData.area;
+            if (finalData.region && !finalData.country) finalData.country = finalData.region;
+        }
         return finalData;
     }
 

@@ -1,11 +1,25 @@
 import { useMemo } from "react";
-import { useParams, useLocation } from "wouter";
+import { useParams, useLocation, Link } from "wouter";
 
 import { Navbar } from "@/components/Navbar";
 import { useMoviesCategoryPaged } from "@/hooks/use-movies";
 import { MovieCard, MovieCardSkeleton } from "@/components/MovieCard";
 import { Footer } from "@/components/Footer";
-import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Flame,
+  Film,
+  Tv,
+  Heart,
+  Smartphone,
+  Sparkles,
+  Laugh,
+  Globe,
+  Mic2,
+  Star
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
@@ -93,26 +107,70 @@ export default function Category() {
     );
   };
 
+  const CATEGORIES = [
+    { id: "trending", label: "Trending", icon: <Flame className="w-4 h-4" /> },
+    { id: "indonesian-movies", label: "Film Indonesia", icon: <Film className="w-4 h-4" /> },
+    { id: "indonesian-drama", label: "Drama Indonesia", icon: <Tv className="w-4 h-4" /> },
+    { id: "kdrama", label: "K-Drama", icon: <Heart className="w-4 h-4" /> },
+    { id: "short-tv", label: "Short TV", icon: <Smartphone className="w-4 h-4" /> },
+    { id: "anime", label: "Anime", icon: <Sparkles className="w-4 h-4" /> },
+    { id: "adult-comedy", label: "Canda Dewasa", icon: <Laugh className="w-4 h-4" /> },
+    { id: "western-tv", label: "Western TV", icon: <Globe className="w-4 h-4" /> },
+    { id: "indo-dub", label: "Indo Dub", icon: <Mic2 className="w-4 h-4" /> },
+    { id: "drama-box", label: "Drama Box", icon: <Star className="w-4 h-4" /> },
+  ];
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Navbar />
 
-      {/* Header */}
-      <div className="relative pt-32 pb-12 md:pb-20 px-4 overflow-hidden">
+      {/* Header & Category Selector */}
+      <div className="relative pt-32 pb-8 px-4 overflow-hidden">
         <div className="absolute inset-0 bg-primary/5 blur-3xl rounded-full scale-150 translate-y-1/2 opacity-20 pointer-events-none" />
         <div className="container mx-auto relative z-10">
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
+            className="mb-8"
           >
-            <h1 className="text-4xl md:text-6xl font-display font-black text-white mb-4 tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-display font-black text-white mb-2 tracking-tight">
               {displayTitle}
             </h1>
-            <div className="h-1.5 w-24 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary),0.5)]" />
-            <p className="mt-6 text-white/60 text-lg max-w-2xl leading-relaxed">
-              {description}
-            </p>
+            <div className="h-1.5 w-24 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary),0.5)] mb-6" />
+
+            {/* Horizontal Category Selector with Moving Underline */}
+            <div className="relative border-b border-white/5">
+              <div className="flex items-center gap-6 md:gap-10 overflow-x-auto no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
+                {CATEGORIES.map((cat) => {
+                  const isActive = categoryName === cat.id;
+                  return (
+                    <Link
+                      key={cat.id}
+                      href={`/category/${cat.id}`}
+                      className="relative py-4 group flex-shrink-0"
+                    >
+                      <div className={`flex items-center gap-2.5 whitespace-nowrap font-bold text-sm md:text-lg transition-all duration-300 ${isActive ? "text-primary scale-110" : "text-white/40 hover:text-white"
+                        }`}>
+                        <span className={`transition-colors duration-300 ${isActive ? "text-primary" : "text-white/20 group-hover:text-primary"
+                          }`}>
+                          {cat.icon}
+                        </span>
+                        {cat.label}
+                      </div>
+
+                      {isActive && (
+                        <motion.div
+                          layoutId="category-underline"
+                          className="absolute bottom-0 left-0 right-0 h-1 bg-primary shadow-[0_0_20px_rgba(229,25,80,0.8)] rounded-t-full z-10"
+                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        />
+                      )}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
           </motion.div>
         </div>
       </div>

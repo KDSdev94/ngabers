@@ -2,10 +2,14 @@ import { useLocation } from "wouter";
 import { useMovieDetail } from "@/hooks/use-movies";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { Loader2, Star, Share2, Heart, PlayCircle, Layers, Info, History, ChevronDown } from "lucide-react";
+import {
+  Loader2, Star, PlayCircle, History,
+  Search, FastForward, Calendar, Globe,
+  Clapperboard, Users, MapPin, Info
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Select,
   SelectContent,
@@ -16,284 +20,272 @@ import {
 
 export default function Detail() {
   const [location, setLocation] = useLocation();
-
   const searchParams = new URLSearchParams(window.location.search);
   const detailPath = searchParams.get("path");
 
   const { data: movie, isLoading, error } = useMovieDetail(detailPath);
   const [selectedSeason, setSelectedSeason] = useState<string | null>(null);
+  const [episodeSearch, setEpisodeSearch] = useState("");
 
   useEffect(() => {
-    if (movie) {
-      if (movie.seasons && movie.seasons.length > 0) {
-        const firstSeasonName = movie.seasons[0].name || `Season ${movie.seasons[0].season}` || "Season 1";
-        setSelectedSeason(firstSeasonName);
-      }
+    if (movie?.seasons?.length) {
+      const firstSeason = movie.seasons[0];
+      setSelectedSeason(firstSeason.name || `Season ${firstSeason.season}` || "Season 1");
     }
   }, [movie]);
 
+  const currentSeason = useMemo(() => {
+    return movie?.seasons?.find(s =>
+      (s.name || `Season ${s.season}` || "Season 1") === selectedSeason
+    );
+  }, [movie, selectedSeason]);
+
+  const filteredEpisodes = useMemo(() => {
+    if (!currentSeason?.episodes) return [];
+    if (!episodeSearch.trim()) return currentSeason.episodes;
+
+    return currentSeason.episodes.filter(ep =>
+      (ep.title || "").toLowerCase().includes(episodeSearch.toLowerCase()) ||
+      (ep.episode || "").toString().includes(episodeSearch)
+    );
+  }, [currentSeason, episodeSearch]);
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="w-12 h-12 text-primary animate-spin" />
-          <p className="text-white/50 font-medium">Loading details...</p>
-        </div>
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center">
+        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+        <p className="text-white/40 font-bold uppercase tracking-widest text-sm animate-pulse text-center">Loading dulu yah!</p>
       </div>
     );
   }
 
   if (error || !movie) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <h2 className="text-2xl font-bold text-white">Ups! Gagal memuat konten.</h2>
-          <p className="text-white/50">Silahkan coba lagi atau kembali ke halaman utama.</p>
-          <Button onClick={() => window.history.back()}>Kembali</Button>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="text-center space-y-6 max-w-md">
+          <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-primary/20">
+            <Info className="w-10 h-10 text-primary" />
+          </div>
+          <h2 className="text-3xl font-black text-white tracking-tight">Koneksi Terputus</h2>
+          <p className="text-white/50 leading-relaxed">Kami tidak dapat memuat konten untuk saat ini. Silakan coba lagi atau kembali ke halaman utama.</p>
+          <Button size="lg" className="w-full rounded-2xl font-bold bg-primary hover:bg-primary/90 text-white" onClick={() => setLocation("/")}>Kembali ke Beranda</Button>
         </div>
       </div>
     );
   }
 
-  const getSeasonDisplayName = (s: any) => s.name || `Season ${s.season}` || "Season 1";
-  const getEpisodeUrl = (ep: any) => ep.playerUrl || ep.url || "";
-  const getEpisodeDisplayName = (ep: any, idx: number) => ep.title || `Episode ${ep.episode}` || `Episode ${idx + 1}`;
-
-  const currentSeason = movie.seasons?.find(s => getSeasonDisplayName(s) === selectedSeason);
+  const handleWatch = (url: string, epTitle: string) => {
+    setLocation(`/watch?url=${encodeURIComponent(url)}&title=${encodeURIComponent(movie.title)}&epTitle=${encodeURIComponent(epTitle)}&path=${encodeURIComponent(detailPath || "")}&poster=${encodeURIComponent(movie.poster || "")}`);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Navbar />
 
-      {/* Backdrop & Header */}
-      <div className="relative w-full h-[50vh] md:h-[70vh]">
-        <div className="absolute inset-0 overflow-hidden">
+      {/* Hero Section - Cinematic Layout */}
+      <section className="relative w-full min-h-[85vh] flex items-end md:items-center py-20 overflow-hidden">
+        {/* Backdrop Background */}
+        <div className="absolute inset-0 z-0">
           <img
             src={movie.poster}
-            alt="Backdrop"
-            className="w-full h-full object-cover blur-md scale-110 opacity-40"
+            alt=""
+            className="w-full h-full object-cover opacity-80 md:opacity-80 blur-sm scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/40 to-transparent hidden md:block" />
         </div>
 
-        <div className="absolute inset-0 container mx-auto px-4 flex flex-col justify-end pb-10 md:pb-16">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="flex flex-col md:flex-row gap-8 items-end"
-          >
-            <div className="hidden md:block w-64 aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl shadow-black/50 border border-white/10 flex-shrink-0">
-              <img src={movie.poster} alt={movie.title} className="w-full h-full object-cover" />
-            </div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="flex flex-col md:flex-row gap-10 items-start md:items-center">
+            {/* Poster Card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6 }}
+              className="w-48 sm:w-64 aspect-[2/3] rounded-3xl overflow-hidden shadow-2xl border border-white/10 flex-shrink-0 self-center md:self-auto group"
+            >
+              <img src={movie.poster} alt={movie.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+            </motion.div>
 
-            <div className="flex-1 space-y-4 md:space-y-6">
-              <div className="flex flex-wrap items-center gap-3">
-                {movie.rating && (
-                  <span className="flex items-center gap-1.5 bg-yellow-500/20 text-yellow-500 px-3 py-1 rounded-lg font-bold border border-yellow-500/20">
-                    <Star className="w-4 h-4 fill-current" /> {movie.rating}
-                  </span>
-                )}
-                <span className="bg-white/10 text-white px-3 py-1 rounded-lg font-medium text-sm border border-white/5">
-                  {movie.year || "2024"}
-                </span>
-                <span className="bg-primary/20 text-primary px-3 py-1 rounded-lg font-bold text-sm border border-primary/20 uppercase">
-                  {movie.type || "MOVIE"}
-                </span>
-              </div>
-
-              <h1 className="text-4xl md:text-6xl font-display font-black text-white leading-tight drop-shadow-xl">
+            {/* Info Container */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="flex-1 space-y-6"
+            >
+              <h1 className="text-4xl md:text-7xl font-display font-black text-white leading-tight tracking-tight drop-shadow-2xl">
                 {movie.title}
               </h1>
 
-              {movie.genre && (
-                <p className="text-lg md:text-xl text-white/70 font-medium">
-                  {movie.genre}
-                </p>
-              )}
+              {/* Meta Rows */}
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                <div className="flex items-center gap-1.5 text-yellow-500 font-black">
+                  <Star className="w-5 h-5 fill-current" />
+                  <span className="text-lg">{movie.rating}</span>
+                </div>
+                <div className="flex items-center gap-2 text-white/60 text-sm font-semibold">
+                  <Calendar className="w-4 h-4" />
+                  {movie.year || "2024"}
+                </div>
+                <div className="flex items-center gap-2 text-white/60 text-sm font-semibold uppercase tracking-wider">
+                  <Clapperboard className="w-4 h-4" />
+                  {movie.type === "tv" ? "Series" : "Movie"}
+                </div>
+                <div className="flex items-center gap-2 text-white/60 text-sm font-semibold">
+                  <Globe className="w-4 h-4" />
+                  {movie.country || "International"}
+                </div>
+              </div>
 
-              <div className="flex flex-wrap gap-4 pt-2">
+              {/* Genre Pills */}
+              <div className="flex flex-wrap gap-2 pt-2">
+                {movie.genre?.split(',').map((g: string) => (
+                  <span key={g} className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-xs font-bold hover:bg-primary/20 hover:border-primary/50 transition-all cursor-default">
+                    {g.trim()}
+                  </span>
+                ))}
+              </div>
+
+              {/* Synopsis */}
+              <p className="text-white/70 text-base md:text-lg leading-relaxed max-w-3xl line-clamp-3 md:line-clamp-none">
+                {movie.description || "Jelajahi petualangan luar biasa dalam judul ini. Sinopsis lengkap akan segera diperbarui untuk pengalaman menonton yang lebih baik."}
+              </p>
+
+
+              {/* Action */}
+              <div className="pt-4">
                 <Button
-                  size="lg"
-                  className="rounded-xl bg-primary hover:bg-primary/90 text-white font-bold h-12 px-8 shadow-lg shadow-primary/20"
+                  size="xl"
+                  className="rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-lg h-14 px-10 shadow-xl shadow-primary/30 group"
                   onClick={() => {
-                    const watchUrl = movie.playerUrl && (!movie.seasons || movie.seasons.length === 0)
-                      ? movie.playerUrl
-                      : currentSeason?.episodes?.[0] ? getEpisodeUrl(currentSeason.episodes[0]) : null;
-
-                    if (watchUrl) {
-                      const epTitle = currentSeason?.episodes?.[0]
-                        ? getEpisodeDisplayName(currentSeason.episodes[0], 0)
-                        : movie.title;
-
-                      setLocation(`/watch?url=${encodeURIComponent(watchUrl)}&title=${encodeURIComponent(movie.title)}&epTitle=${encodeURIComponent(epTitle)}&path=${encodeURIComponent(detailPath || "")}&poster=${encodeURIComponent(movie.poster || "")}`);
+                    const firstEp = currentSeason?.episodes?.[0];
+                    if (movie.playerUrl && !currentSeason?.episodes?.length) {
+                      handleWatch(movie.playerUrl, movie.title);
+                    } else if (firstEp) {
+                      handleWatch(firstEp.playerUrl || firstEp.url, firstEp.title || `Episode 1`);
                     }
                   }}
                 >
-                  <PlayCircle className="w-5 h-5 mr-2 fill-current" />
-                  Start Watching
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="rounded-xl bg-white/5 border-white/10 text-white hover:bg-white/10 h-12 px-6"
-                >
-                  <Heart className="w-5 h-5 mr-2" />
-                  Favorite
-                </Button>
-                <Button
-                  size="lg"
-                  variant="ghost"
-                  className="rounded-xl text-white/70 hover:text-white hover:bg-white/5 h-12 px-4"
-                >
-                  <Share2 className="w-5 h-5" />
+                  <PlayCircle className="w-6 h-6 mr-3 fill-current group-hover:scale-110 transition-transform" />
+                  Tonton Sekarang
                 </Button>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <div className="container mx-auto px-4 mt-8 md:mt-12">
-        <div className="max-w-6xl mx-auto space-y-12">
-          {/* 1. Synopsis / Storyline At Top */}
-          <section className="space-y-4">
-            <div className="flex items-center gap-2 text-primary">
-              <History className="w-6 h-6" />
-              <h3 className="text-2xl font-black text-white uppercase tracking-tight">Synopsis</h3>
-            </div>
-            <div className="bg-card border border-white/5 rounded-3xl p-6 md:p-10 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[80px] rounded-full pointer-events-none" />
-              <p className="text-lg md:text-xl leading-relaxed text-white/70 relative z-10">
-                {movie.description || "No description available for this title."}
-              </p>
-            </div>
-          </section>
+      {/* Episodes Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="max-w-6xl mx-auto space-y-10">
 
-          {/* 2. Split Content: Info (Left) and Episodes (Right) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-16">
-            {/* Information (Left - 1 column) */}
-            <div className="lg:col-span-1 space-y-6">
-              <div className="bg-card border border-white/5 rounded-3xl p-6 md:p-8">
-                <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                  <Info className="w-5 h-5 text-primary" />
-                  Information
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex justify-between border-b border-white/5 pb-4">
-                    <span className="text-white/50 text-sm font-medium">Status</span>
-                    <span className="text-white font-bold">Released</span>
-                  </div>
-                  <div className="flex justify-between border-b border-white/5 pb-4">
-                    <span className="text-white/50 text-sm font-medium">Release Year</span>
-                    <span className="text-white font-bold">{movie.year || "2024"}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-white/5 pb-4">
-                    <span className="text-white/50 text-sm font-medium">Rating</span>
-                    <span className="text-yellow-500 font-black tracking-wider">{movie.rating || "8.5"}/10</span>
-                  </div>
-                  <div className="flex flex-col gap-3 pt-2">
-                    <span className="text-white/50 text-sm font-medium">Genre</span>
-                    <div className="flex flex-wrap gap-2">
-                      {movie.genre?.split(',').map((g: string) => (
-                        <span key={g} className="text-xs font-bold bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full text-white/80 border border-white/5 transition-colors">
-                          {g.trim()}
-                        </span>
-                      )) || <span className="text-xs text-white/30">N/A</span>}
-                    </div>
-                  </div>
-                </div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <History className="w-6 h-6 text-primary" />
               </div>
+              <h2 className="text-3xl font-display font-black text-white tracking-tight uppercase">Episodes</h2>
             </div>
 
-            {/* Episodes (Right - 2 columns) */}
-            <div className="lg:col-span-2">
-              {movie.seasons && movie.seasons.length > 0 ? (
-                <div className="bg-card/30 border border-white/5 rounded-3xl p-6 md:p-8 space-y-6">
-                  <div className="flex flex-wrap items-center justify-between gap-4">
-                    <div className="flex items-center gap-2 text-white font-bold text-xl">
-                      <Layers className="w-6 h-6 text-primary" />
-                      Episodes
-                    </div>
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Episode Search */}
+              <div className="relative group w-full md:w-64">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-primary transition-colors" />
+                <input
+                  type="text"
+                  placeholder="Cari episode..."
+                  value={episodeSearch}
+                  onChange={(e) => setEpisodeSearch(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all placeholder:text-white/20"
+                />
+              </div>
 
-                    {/* Season Selector Dropdown */}
-                    {movie.seasons.length > 1 ? (
-                      <Select value={selectedSeason || ""} onValueChange={setSelectedSeason}>
-                        <SelectTrigger className="w-[180px] bg-white/5 border-white/10 text-white rounded-xl focus:ring-primary/20">
-                          <SelectValue placeholder="Select Season" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-xl">
-                          {movie.seasons.map((season: any, i: number) => {
-                            const name = getSeasonDisplayName(season);
-                            return (
-                              <SelectItem
-                                key={name + i}
-                                value={name}
-                                className="focus:bg-primary focus:text-white cursor-pointer"
-                              >
-                                {name}
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <div className="px-4 py-2 bg-primary/10 border border-primary/20 rounded-xl text-primary text-xs font-black uppercase tracking-widest">
-                        {selectedSeason}
-                      </div>
-                    )}
-                  </div>
+              {/* "Episode Terakhir" Shortcut */}
+              <Button
+                variant="glow"
+                className="rounded-2xl bg-primary/10 border border-primary/20 text-primary hover:bg-primary hover:text-white transition-all font-bold h-12"
+                onClick={() => {
+                  const lastEp = currentSeason?.episodes?.[currentSeason.episodes.length - 1];
+                  if (lastEp) handleWatch(lastEp.playerUrl || lastEp.url, lastEp.title || `Episode ${lastEp.episode}`);
+                }}
+              >
+                <FastForward className="w-4 h-4 mr-2" />
+                Episode Terakhir
+              </Button>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
-                    {currentSeason?.episodes?.map((ep: any, idx: number) => {
-                      const epUrl = getEpisodeUrl(ep);
-                      const epName = getEpisodeDisplayName(ep, idx);
+              {/* Season Selector */}
+              {movie.seasons && movie.seasons.length > 1 && (
+                <Select value={selectedSeason || ""} onValueChange={setSelectedSeason}>
+                  <SelectTrigger className="w-full md:w-48 h-12 bg-white/5 border-white/10 text-white rounded-2xl font-bold">
+                    <SelectValue placeholder="Pilih Season" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-2xl">
+                    {movie.seasons.map((s, i) => {
+                      const name = s.name || `Season ${s.season}` || "Season 1";
                       return (
-                        <button
-                          key={idx}
-                          onClick={() => {
-                            setLocation(`/watch?url=${encodeURIComponent(epUrl)}&title=${encodeURIComponent(movie.title)}&epTitle=${encodeURIComponent(epName)}&path=${encodeURIComponent(detailPath || "")}&poster=${encodeURIComponent(movie.poster || "")}`);
-                          }}
-                          className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/50 hover:bg-white/10 transition-all text-left group"
-                        >
-                          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-xs font-black text-white/30 group-hover:bg-primary group-hover:text-white transition-all">
-                            {idx + 1}
-                          </div>
-                          <span className="text-sm font-bold text-white/70 group-hover:text-white line-clamp-1 flex-1">
-                            {epName}
-                          </span>
-                          <PlayCircle className="w-5 h-5 text-white/5 group-hover:text-primary transition-colors opacity-0 group-hover:opacity-100" />
-                        </button>
+                        <SelectItem key={i} value={name} className="focus:bg-primary focus:text-white cursor-pointer py-3 font-bold">
+                          {name}
+                        </SelectItem>
                       );
                     })}
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-card/30 border border-white/5 rounded-3xl p-12 flex flex-col items-center justify-center text-center space-y-4">
-                  <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center">
-                    <PlayCircle className="w-10 h-10 text-white/10" />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-white font-bold text-xl uppercase tracking-tight">Ready to Watch</p>
-                    <p className="text-white/30 text-sm">Click the movie start button below to begin streaming.</p>
-                  </div>
-                  <Button
-                    className="bg-primary hover:bg-primary/90 text-white font-bold rounded-xl h-11 px-8"
-                    onClick={() => {
-                      if (movie.playerUrl) {
-                        setLocation(`/watch?url=${encodeURIComponent(movie.playerUrl)}&title=${encodeURIComponent(movie.title)}&epTitle=${encodeURIComponent(movie.title)}&path=${encodeURIComponent(detailPath || "")}&poster=${encodeURIComponent(movie.poster || "")}`);
-                      }
-                    }}
-                  >
-                    START STREAMING
-                  </Button>
-                </div>
+                  </SelectContent>
+                </Select>
               )}
             </div>
           </div>
+
+          {/* Episode Grid */}
+          <AnimatePresence mode="wait">
+            {filteredEpisodes.length > 0 ? (
+              <motion.div
+                key={selectedSeason + episodeSearch}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="max-h-[60vh] overflow-y-auto pr-2 scrollbar-thin"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  {filteredEpisodes.map((ep, idx) => {
+                    const title = ep.title || `Episode ${ep.episode || idx + 1}`;
+                    return (
+                      <motion.button
+                        key={idx}
+                        whileHover={{ scale: 1.03, y: -5 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => handleWatch(ep.playerUrl || ep.url, title)}
+                        className="group relative bg-white/5 border border-white/10 rounded-2xl p-5 text-left transition-all hover:bg-white/10 hover:border-primary/50 overflow-hidden"
+                      >
+                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-100 group-hover:text-primary transition-all">
+                          <PlayCircle className="w-6 h-6" />
+                        </div>
+                        <div className="space-y-1 relative z-10">
+                          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-primary transition-colors">
+                            Episode {ep.episode || idx + 1}
+                          </span>
+                          <h4 className="text-white font-bold text-lg group-hover:text-shadow-glow transition-all line-clamp-1">
+                            {title}
+                          </h4>
+                        </div>
+                        {/* Hover Glow */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </motion.button>
+                    );
+                  })}
+                </div>
+              </motion.div>
+            ) : (
+              <div className="py-20 text-center space-y-4 bg-white/5 rounded-3xl border border-dashed border-white/10">
+                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+                  <Search className="w-8 h-8 text-white/10" />
+                </div>
+                <p className="text-white/40 font-bold uppercase tracking-widest text-sm">Tidak ada episode ditemukan</p>
+              </div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
+
       <Footer variant="full" />
     </div>
   );

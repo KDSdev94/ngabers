@@ -51,7 +51,49 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Custom Scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #E51950 rgba(255, 255, 255, 0.05);
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+    display: block;
+    /* Force show on mobile */
+    -webkit-appearance: none;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #E51950;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    /* Slight border for contrast */
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: #be123c;
   }
 }

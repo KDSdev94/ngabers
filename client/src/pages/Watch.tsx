@@ -4,7 +4,7 @@ import { useHistory } from "@/hooks/use-history";
 import { Navbar } from "@/components/Navbar";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { Footer } from "@/components/Footer";
-import { ArrowLeft, ArrowRight, Share2, Info, MessageSquare, ChevronLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight, Share2, Info, MessageSquare, ChevronLeft, Star, Calendar, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -211,24 +211,55 @@ export default function Watch() {
                         </div>
                     </div>
 
-                    {/* Social / Comments Placeholder */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-                        <div className="md:col-span-2 bg-card/30 border border-white/5 rounded-[2rem] p-8 flex items-center justify-center min-h-[150px]">
-                            <div className="text-center space-y-3">
-                                <MessageSquare className="w-10 h-10 text-white/10 mx-auto" />
-                                <p className="text-white/40 font-medium tracking-wide">Comments coming soon...</p>
-                                <p className="text-white/20 text-xs">Join the community to discuss this title!</p>
+                    {/* Info & Comments Section */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-6">
+                        {/* Left Column: Movie Info */}
+                        <div className="lg:col-span-2 space-y-6">
+                            <div className="bg-white/5 border border-white/5 rounded-[2rem] p-8">
+                                <h1 className="text-3xl md:text-4xl font-display font-black text-white mb-4 leading-tight">
+                                    {movie?.title || title}
+                                </h1>
+
+                                <div className="flex flex-wrap items-center gap-6 text-sm font-bold text-white/50 mb-6">
+                                    <div className="flex items-center gap-2 text-yellow-500">
+                                        <Star className="w-4 h-4 fill-current" />
+                                        <span>{movie?.rating || "8.9"}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Calendar className="w-4 h-4" />
+                                        <span>{movie?.year || "2024"}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Globe className="w-4 h-4" />
+                                        <span>{movie?.country || "International"}</span>
+                                    </div>
+                                    {movie?.genre && (
+                                        <div className="px-3 py-1 rounded-full bg-white/10 text-white/80 text-xs">
+                                            {movie.genre.split(',')[0]}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <p className="text-lg text-white/70 leading-relaxed font-medium">
+                                    {movie?.description || "Sinopsis belum tersedia untuk judul ini."}
+                                </p>
                             </div>
                         </div>
 
-                        <div className="bg-gradient-to-br from-primary/10 to-transparent border border-primary/10 rounded-[2rem] p-8 flex flex-col justify-center">
-                            <h3 className="text-xl font-black text-white mb-4 tracking-tight">Enjoying Ngabers?</h3>
-                            <p className="text-sm text-white/50 leading-relaxed mb-6">
-                                Dukung kami dengan share ke teman-temanmu agar kami bisa terus menyediakan konten berkualitas secara gratis!
-                            </p>
-                            <Button className="w-full bg-primary hover:bg-primary/90 text-white font-black rounded-xl h-12 shadow-lg shadow-primary/20">
-                                JOIN DISCORD
-                            </Button>
+                        {/* Right Column: Comments (Moved here) */}
+                        <div className="lg:col-span-1">
+                            <div className="bg-card/30 border border-white/5 rounded-[2rem] p-6 h-full min-h-[300px] flex flex-col">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <MessageSquare className="w-5 h-5 text-primary" />
+                                    <h3 className="text-xl font-bold text-white">Komentar</h3>
+                                </div>
+
+                                <div className="flex-1 flex flex-col items-center justify-center text-center space-y-3 opacity-50">
+                                    <MessageSquare className="w-12 h-12 text-white/20" />
+                                    <p className="text-sm font-medium">Belum ada komentar.</p>
+                                    <p className="text-xs">Jadilah yang pertama berkomentar!</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
