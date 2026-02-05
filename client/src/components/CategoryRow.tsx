@@ -22,19 +22,23 @@ export function CategoryRow({ title, items, isLoading, viewAllLink }: CategoryRo
   const nextElClass = `swiper-next-${sanitizedId}`;
 
   return (
-    <section className="py-8 md:py-12 last:border-0 relative group/row">
-      <div className="container mx-auto px-4 mb-6 flex items-end justify-between">
-        <div>
-          <h2 className="text-2xl md:text-3xl font-display font-bold text-white mb-2">{title}</h2>
-          <div className="h-1 w-20 bg-primary rounded-full transition-all duration-300 group-hover/row:w-32" />
-        </div>
+    <section className="py-5 md:py-12 last:border-0 relative group/row">
+      <div className="container mx-auto px-4 mb-4 md:mb-6">
+        <div className="flex items-center justify-between gap-4 mb-2 md:mb-3">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-xl md:text-3xl font-display font-bold text-white truncate md:whitespace-normal leading-tight">
+              {title}
+            </h2>
+          </div>
 
-        {viewAllLink && (
-          <Link href={viewAllLink} className="group flex items-center gap-2 text-sm font-semibold text-white/60 hover:text-primary transition-colors">
-            View All
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-          </Link>
-        )}
+          {viewAllLink && (
+            <Link href={viewAllLink} className="flex-shrink-0 group flex items-center gap-1.5 text-xs md:text-sm font-semibold text-white/60 hover:text-primary transition-colors">
+              <span className="whitespace-nowrap">View All</span>
+              <ArrowRight className="w-3.5 h-3.5 md:w-4 md:h-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          )}
+        </div>
+        <div className="h-1 w-12 md:w-20 bg-primary rounded-full transition-all duration-300 group-hover/row:w-32" />
       </div>
 
       <div className="container mx-auto px-4 relative">
@@ -74,7 +78,7 @@ export function CategoryRow({ title, items, isLoading, viewAllLink }: CategoryRo
                   spaceBetween: 24
                 },
               }}
-              className="!overflow-visible"
+              className="rounded-xl"
             >
               {items.map((movie) => (
                 <SwiperSlide key={movie.id}>
@@ -84,11 +88,11 @@ export function CategoryRow({ title, items, isLoading, viewAllLink }: CategoryRo
             </Swiper>
 
             {/* Custom Navigation Buttons - Positioned to look integrated */}
-            <button className={`${prevElClass} absolute left-0 top-1/2 -translate-y-1/2 -ml-6 z-30 w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/swiper:opacity-100 transition-all duration-300 hover:bg-primary hover:border-primary disabled:hidden hover:scale-110 shadow-2xl hidden md:flex`}>
-              <ChevronLeft className="w-6 h-6" />
+            <button className={`${prevElClass} absolute left-0 top-1/2 -translate-y-1/2 -ml-4 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/80 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/swiper:opacity-100 transition-all duration-300 hover:bg-primary hover:border-primary disabled:hidden hover:scale-110 shadow-2xl hidden md:flex`}>
+              <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
             </button>
-            <button className={`${nextElClass} absolute right-0 top-1/2 -translate-y-1/2 -mr-6 z-30 w-12 h-12 rounded-full bg-black/60 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/swiper:opacity-100 transition-all duration-300 hover:bg-primary hover:border-primary disabled:hidden hover:scale-110 shadow-2xl hidden md:flex`}>
-              <ChevronRight className="w-6 h-6" />
+            <button className={`${nextElClass} absolute right-0 top-1/2 -translate-y-1/2 -mr-4 z-30 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/80 backdrop-blur-md border border-white/10 flex items-center justify-center text-white opacity-0 group-hover/swiper:opacity-100 transition-all duration-300 hover:bg-primary hover:border-primary disabled:hidden hover:scale-110 shadow-2xl hidden md:flex`}>
+              <ChevronRight className="w-5 h-5 md:w-6 md:h-6" />
             </button>
           </div>
         ) : (
