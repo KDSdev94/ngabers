@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Loader2, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 
 interface VideoPlayerProps {
   url: string;
@@ -8,41 +8,76 @@ interface VideoPlayerProps {
 export function VideoPlayer({ url }: VideoPlayerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
 
-  // Note: Most streaming APIs return an iframe URL. 
-  // We need to ensure we handle it securely.
+  // Handle timeout
+  useEffect(() => {
+    if (!loading) return;
+
+    const timer = setTimeout(() => {
+      if (loading) {
+        console.warn("Video loading timed out after 25s");
+        setError(true);
+        setLoading(false);
+      }
+    }, 25000); // 25 seconds timeout
+
+    return () => clearTimeout(timer);
+  }, [loading, retryCount]);
 
   if (!url) return null;
+
+  const handleRetry = () => {
+    setError(false);
+    setLoading(true);
+    setRetryCount(prev => prev + 1);
+  };
 
   return (
     <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl shadow-black/50 ring-1 ring-white/10 group">
       {loading && !error && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-10">
           <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
-          <p className="text-white/60 font-medium">Loading stream...</p>
+          <p className="text-white/60 font-medium">Menyambungkan ke server...</p>
+          <p className="text-white/30 text-xs mt-2 uppercase tracking-widest">Sabar ya, lagi loading...</p>
         </div>
       )}
 
       {error && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-10">
-          <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-          <p className="text-white font-medium">Unable to load video</p>
-          <p className="text-white/40 text-sm mt-2">Source might be unavailable</p>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-10 p-6 text-center">
+          <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mb-6">
+            <AlertCircle className="w-10 h-10 text-red-500" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">Gagal Memuat Video</h3>
+          <p className="text-white/60 text-sm max-w-sm mb-8">
+            Server sedang sibuk atau koneksi internet kamu terblokir.
+            Coba gunakan VPN atau ganti jaringan internet.
+          </p>
+          <button
+            onClick={handleRetry}
+            className="flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-2xl hover:bg-primary/80 transition-all active:scale-95"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Coba Lagi
+          </button>
         </div>
       )}
 
-      <iframe
-        src={url}
-        className="w-full h-full border-0"
-        allowFullScreen
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation"
-        onLoad={() => setLoading(false)}
-        onError={() => {
-          setLoading(false);
-          setError(true);
-        }}
-      />
+      {!error && (
+        <iframe
+          key={`${url}-${retryCount}`}
+          src={url}
+          className="w-full h-full border-0"
+          allowFullScreen
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-top-navigation"
+          onLoad={() => setLoading(false)}
+          onError={() => {
+            setLoading(false);
+            setError(true);
+          }}
+        />
+      )}
 
       {/* Cinematic Vignette */}
       <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] rounded-2xl" />
