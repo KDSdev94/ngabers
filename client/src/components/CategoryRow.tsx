@@ -25,11 +25,11 @@ export function CategoryRow({ title, items, isLoading, viewAllLink, icon }: Cate
   return (
     <section className="py-5 md:py-12 last:border-0 relative group/row">
       <div className="container mx-auto px-4 mb-4 md:mb-6">
-        <div className="flex items-center justify-between gap-4 mb-2 md:mb-3">
-          <div className="flex-1 min-w-0">
-            <h2 className="text-xl md:text-3xl font-display font-bold text-white truncate md:whitespace-normal leading-tight flex items-center gap-3">
-              {icon && <span className="text-primary">{icon}</span>}
-              {title}
+        <div className="flex items-center justify-between gap-6 md:gap-10 mb-2 md:mb-3">
+          <div className="flex-1 min-w-0 pr-4">
+            <h2 className="text-lg md:text-2xl font-display font-bold text-white truncate leading-tight flex items-center gap-2 md:gap-3">
+              {icon && <span className="text-primary shrink-0">{icon}</span>}
+              <span className="truncate">{title}</span>
             </h2>
           </div>
 
@@ -98,7 +98,7 @@ export function CategoryRow({ title, items, isLoading, viewAllLink, icon }: Cate
             </button>
           </div>
         ) : (
-          <div className="w-full text-center text-white/40 py-10">No items found</div>
+          <div className="w-full text-center text-white/40 py-10">Item Gak Ditemukan</div>
         )}
       </div>
     </section>

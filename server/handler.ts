@@ -2,7 +2,7 @@ import { storage } from "./storage";
 import { api as apiRoutes } from "../shared/routes";
 import { z } from "zod";
 
-const BASE_API_URL = "https://zeldvorik.ru/apiv3/api.php";
+const BASE_API_URL = "https://foodcash.com.br/sistema/apiv4/api.php";
 const DRAMA_BOX_API_URL = "https://db.hafizhibnusyam.my.id/api";
 const BOTRAIKI_API_URL = "https://dramabox.botraiki.biz/api";
 
@@ -11,8 +11,68 @@ const COMMON_HEADERS = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 };
 
-// ... existing helper functions (fetchFromDramaBox, fetchDramaBoxDetail, etc.) ...
-// I will keep them but as separate exports or internal helpers.
+async function fetchPagedData(
+    requestPage: number,
+    fetchFn: (p: number) => Promise<any>
+) {
+    const UI_SIZE = 24;
+    const API_SIZE = 20;
+
+    // Calculate which global items we need
+    const startItem = (requestPage - 1) * UI_SIZE;
+    const endItem = requestPage * UI_SIZE;
+
+    // Calculate which API pages cover this range
+    // API Page 1: 0-19, Page 2: 20-39, Page 3: 40-59
+    const startApiPage = Math.floor(startItem / API_SIZE) + 1;
+    const endApiPage = Math.floor((endItem - 1) / API_SIZE) + 1;
+
+    // Fetch all required pages
+    const promises = [];
+    for (let p = startApiPage; p <= endApiPage; p++) {
+        promises.push(fetchFn(p).catch(() => ({ items: [], hasMore: false })));
+    }
+
+    const results = await Promise.all(promises);
+
+    // Merge all items from fetched pages
+    let allItems: any[] = [];
+    for (const res of results) {
+        if (res && Array.isArray(res.items)) {
+            allItems = allItems.concat(res.items);
+        }
+    }
+
+    // Determine slice indices relative to the merged array
+    // The merged array starts at global index: (startApiPage - 1) * API_SIZE
+    const globalStartOfFetch = (startApiPage - 1) * API_SIZE;
+    const relativeStart = startItem - globalStartOfFetch;
+    const relativeEnd = relativeStart + UI_SIZE;
+
+    const slicedItems = allItems.slice(relativeStart, relativeEnd);
+
+    // Determine hasMore
+    // If we have more items in the buffer than we used, then YES, next page exists
+    let hasMore = false;
+    if (slicedItems.length === UI_SIZE) {
+        if (allItems.length > relativeEnd) {
+            hasMore = true;
+        } else {
+            // We used exactly everything we fetched. Check the last API page's hasMore
+            const lastResult = results[results.length - 1];
+            hasMore = !!lastResult?.hasMore;
+        }
+    }
+
+    console.log(`[VirtualPaging] UI Page ${requestPage} (Req: ${startItem}-${endItem}) -> API Pages ${startApiPage}-${endApiPage}. Got ${slicedItems.length} items. HasMore: ${hasMore}`);
+
+    return {
+        success: true,
+        items: slicedItems,
+        page: requestPage,
+        hasMore
+    };
+}
 
 async function fetchFromDramaBox(endpoint: string, page: number = 1) {
     const url = `${DRAMA_BOX_API_URL}${endpoint}?page=${page}`;
@@ -221,34 +281,43 @@ export async function handleApiRequest(path: string, method: string, query: any,
     // 1. Category List: /api/movies/:category
     if (path.startsWith("/api/movies/")) {
         const category = path.replace("/api/movies/", "") || "trending";
-        const page = query.page || 1;
+        const page = Number(query.page) || 1;
 
         console.log(`[Handler] Category: ${category}, Page: ${page}`);
 
-        if (category.startsWith('drama-box')) {
-            let endpoint = '/dramas';
-            if (category === 'drama-box-trending') endpoint = '/dramas/trending';
-            else if (category === 'drama-box-indo') endpoint = '/dramas/indo';
-            else if (category === 'drama-box-must-sees') endpoint = '/dramas/must-sees';
-            else if (category === 'drama-box-hidden-gems') endpoint = '/dramas/hidden-gems';
-            return await fetchFromDramaBox(endpoint, Number(page));
-        }
+        const fetchFn = async (apiPage: number) => {
+            if (category.startsWith('drama-box')) {
+                let endpoint = '/dramas';
+                if (category === 'drama-box-trending') endpoint = '/dramas/trending';
+                else if (category === 'drama-box-indo') endpoint = '/dramas/indo';
+                else if (category === 'drama-box-must-sees') endpoint = '/dramas/must-sees';
+                else if (category === 'drama-box-hidden-gems') endpoint = '/dramas/hidden-gems';
+                return await fetchFromDramaBox(endpoint, apiPage);
+            }
 
-        // Specific regional categories use curated actions to prevent irrelevant foreign results.
-        // Broad categories like 'anime' or 'kdrama' use search to reveal their massive hidden database.
-        const CURATED_ACTIONS = ['trending', 'indonesian-movies', 'indonesian-drama', 'indo-dub'];
-        let apiUrl: string;
+            // Specific regional categories use curated actions to prevent irrelevant foreign results.
+            const CURATED_ACTIONS = [
+                'trending',
+                'indonesian-movies',
+                'indonesian-drama',
+                'kdrama',
+                'short-tv',
+                'anime',
+                'adult-comedy',
+                'western-tv',
+                'indo-dub'
+            ];
+            let apiUrl: string;
 
-        if (CURATED_ACTIONS.includes(category)) {
-            apiUrl = `${BASE_API_URL}?action=${category}&page=${page}`;
-        } else if (category.startsWith('genre-')) {
-            apiUrl = `${BASE_API_URL}?action=search&q=${encodeURIComponent(category.replace('genre-', ''))}&page=${page}`;
-        } else {
-            // broad search for everything else (anime, etc.)
-            apiUrl = `${BASE_API_URL}?action=search&q=${encodeURIComponent(category.replace(/-/g, ' '))}&page=${page}`;
-        }
+            if (CURATED_ACTIONS.includes(category)) {
+                apiUrl = `${BASE_API_URL}?action=${category}&page=${apiPage}`;
+            } else if (category.startsWith('genre-')) {
+                apiUrl = `${BASE_API_URL}?action=search&q=${encodeURIComponent(category.replace('genre-', ''))}&page=${apiPage}`;
+            } else {
+                // broad search for everything else (anime, etc.)
+                apiUrl = `${BASE_API_URL}?action=search&q=${encodeURIComponent(category.replace(/-/g, ' '))}&page=${apiPage}`;
+            }
 
-        try {
             const resp = await fetch(apiUrl, { signal: AbortSignal.timeout(10000) });
             if (!resp.ok) throw new Error("Upstream error");
             const data = await resp.json();
@@ -264,6 +333,10 @@ export async function handleApiRequest(path: string, method: string, query: any,
                 }
             }
             return data;
+        };
+
+        try {
+            return await fetchPagedData(page, fetchFn);
         } catch (e) {
             // Fallbacks
             if (category === 'trending') return await fetchFromDramaBox('/dramas/trending', Number(page));

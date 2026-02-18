@@ -23,8 +23,25 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
+const CATEGORY_TITLES: Record<string, string> = {
+  "trending": "Lagi Tren",
+  "indonesian-movies": "Film Indonesia",
+  "indonesian-drama": "Drama Indonesia",
+  "kdrama": "Drakor Terbaru",
+  "short-tv": "Hot TV",
+  "anime": "Masuk ke Dunia Anime",
+  "adult-comedy": "Yang hot-hot",
+  "western-tv": "TV Barat",
+  "indo-dub": "Dub Indo Terbaik!",
+  "drama-box": "Drama Box Specials",
+  "drama-box-must-sees": "Drama Box: Rekomendasi untukmu",
+  "drama-box-hidden-gems": "Drama Box: Hidden Gems"
+};
+
 // Helper to format category/genre slug to title
 const formatTitle = (slug: string) => {
+  if (CATEGORY_TITLES[slug]) return CATEGORY_TITLES[slug];
+
   return slug
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -49,7 +66,7 @@ export default function Category() {
   const items = data?.items || [];
   const hasMore = data?.hasMore || false;
   const displayTitle = formatTitle(categoryName);
-  const description = `Jelajahi koleksi ${displayTitle.toLowerCase()} kami yang lengkap, diperbarui setiap hari dengan konten berkualitas tinggi.`;
+  const description = `Jelajahi koleksi ${displayTitle} kami yang lengkap, diperbarui setiap hari dengan konten berkualitas tinggi.`;
 
   const handlePageChange = (newPage: number) => {
     // Force a full page refresh to ensure data is updated correctly

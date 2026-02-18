@@ -54,13 +54,16 @@ export function Navbar() {
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-8">
             {[
-              { label: "Beranda", href: "/" },
-              { label: "Kategori", href: "/category/trending", pattern: "/category" },
-              { label: "Genre", href: "/genres" },
-              { label: "Histori", href: "/history" },
+              { label: "Home", href: "/" },
+              { label: "All Categories", href: "/category/trending", pattern: "/category" },
+              { label: "K-Drama", href: "/category/kdrama" },
+              { label: "Short TV", href: "/category/short-tv" },
+              { label: "Anime", href: "/category/anime" },
+              { label: "Western TV", href: "/category/western-tv" },
+              { label: "Indo Dub", href: "/category/indo-dub" },
             ].map((item) => {
               const isActive = item.pattern
-                ? location.startsWith(item.pattern)
+                ? location.startsWith(item.pattern) && (item.href === "/category/trending" ? location === "/category/trending" : true)
                 : location === item.href;
 
               return (
@@ -193,13 +196,16 @@ export function Navbar() {
           >
             <nav className="flex flex-col p-4 gap-2">
               {[
-                { label: "Beranda", href: "/" },
-                { label: "Kategori", href: "/category/trending", pattern: "/category" },
-                { label: "Genre", href: "/genres" },
-                { label: "Histori", href: "/history" },
+                { label: "Home", href: "/" },
+                { label: "All Categories", href: "/category/trending", pattern: "/category" },
+                { label: "K-Drama", href: "/category/kdrama" },
+                { label: "Short TV", href: "/category/short-tv" },
+                { label: "Anime", href: "/category/anime" },
+                { label: "Western TV", href: "/category/western-tv" },
+                { label: "Indo Dub", href: "/category/indo-dub" },
               ].map((item) => {
                 const isActive = item.pattern
-                  ? location.startsWith(item.pattern)
+                  ? location.startsWith(item.pattern) && (item.href === "/category/trending" ? location === "/category/trending" : true)
                   : location === item.href;
 
                 return (

@@ -1,7 +1,24 @@
 // Vercel Serverless Function - Self-contained API Handler
 // This file must be standalone and cannot import from ../server/
 
-const BASE_API_URL = "https://zeldvorik.ru/apiv3/api.php";
+/**
+ * Base URL: https://foodcash.com.br/sistema/apiv4/api.php 
+ * 📚 Daftar Endpoint
+ * Semua endpoint tersedia melalui parameter action
+ * 
+ * 1. Trending Content: action=trending
+ * 2. Film Indonesia: action=indonesian-movies
+ * 3. Drama Indonesia: action=indonesian-drama
+ * 4. K-Drama: action=kdrama
+ * 5. Short TV: action=short-tv
+ * 6. Anime: action=anime
+ * 7. Canda Dewasa: action=adult-comedy
+ * 8. Western TV: action=western-tv
+ * 9. Indo Dub: action=indo-dub
+ * 10. Search: action=search&q=keyword
+ * 11. Detail Content: action=detail&detailPath=PATH
+ */
+const BASE_API_URL = "https://foodcash.com.br/sistema/apiv4/api.php";
 const DRAMA_BOX_API_URL = "https://db.hafizhibnusyam.my.id/api";
 const BOTRAIKI_API_URL = "https://dramabox.botraiki.biz/api";
 
@@ -235,7 +252,17 @@ async function handleApiRequest(path: string, method: string, query: any, body: 
             return await fetchFromDramaBox(endpoint, Number(page));
         }
 
-        const CURATED_ACTIONS = ['trending', 'indonesian-movies', 'indonesian-drama', 'indo-dub'];
+        const CURATED_ACTIONS = [
+            'trending',
+            'indonesian-movies',
+            'indonesian-drama',
+            'kdrama',
+            'short-tv',
+            'anime',
+            'adult-comedy',
+            'western-tv',
+            'indo-dub'
+        ];
         let apiUrl: string;
 
         if (CURATED_ACTIONS.includes(category)) {

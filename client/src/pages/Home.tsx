@@ -3,8 +3,20 @@ import { HeroSlider } from "@/components/HeroSlider";
 import { CategoryRow } from "@/components/CategoryRow";
 import { Footer } from "@/components/Footer";
 import { useMoviesCategory } from "@/hooks/use-movies";
-import { Loader2, Flame, Film, Zap, Heart, Tv, Globe, Star, Clapperboard, Gem, MonitorPlay, Laugh } from "lucide-react";
-
+import {
+  Clapperboard,
+  Gem,
+  Flame,
+  Film,
+  Tv,
+  Heart,
+  Smartphone,
+  Sparkles,
+  Laugh,
+  Globe,
+  Mic2,
+  Star
+} from "lucide-react";
 export default function Home() {
   // ... (lines 8-105 remain unchanged)
   // Fetch all 9 categories for the homepage
@@ -48,7 +60,7 @@ export default function Home() {
         <div className="bg-gradient-to-t from-background via-background to-transparent pt-24 md:pt-32 space-y-2 md:space-y-6">
           {/* 1. Trending */}
           <CategoryRow
-            title="Sedang Tren"
+            title="Lagi Tren"
             icon={<Flame className="w-5 h-5 md:w-6 md:h-6 fill-current" />}
             items={getItems(trending)}
             isLoading={loadingTrending}
@@ -64,8 +76,8 @@ export default function Home() {
           />
           {/* 3. Anime (THIRD) */}
           <CategoryRow
-            title="Masuk ke Dunia Animasi"
-            icon={<Zap className="w-5 h-5 md:w-6 md:h-6 fill-current" />}
+            title="Masuk ke Dunia Anime"
+            icon={<Sparkles className="w-5 h-5 md:w-6 md:h-6 fill-current" />}
             items={getItems(anime)}
             isLoading={loadingAnime}
             viewAllLink="/category/anime"
@@ -89,8 +101,8 @@ export default function Home() {
           />
           {/* 9. Indo Dub */}
           <CategoryRow
-            title="Tayangan Dub Indo Terbaik!"
-            icon={<Globe className="w-5 h-5 md:w-6 md:h-6" />}
+            title="Dub Indo Terbaik!"
+            icon={<Mic2 className="w-5 h-5 md:w-6 md:h-6" />}
             items={getItems(indoDub)}
             isLoading={loadingIndoDub}
             viewAllLink="/category/indo-dub"
@@ -107,7 +119,7 @@ export default function Home() {
 
           {/* Drama Box Must Sees */}
           <CategoryRow
-            title="Drama Box: Recommended for You"
+            title="Drama Box: Rekomendasi untukmu"
             icon={<Clapperboard className="w-5 h-5 md:w-6 md:h-6 fill-current" />}
             items={getItems(dbMustSees)}
             isLoading={loadingDbMustSees}
@@ -123,28 +135,25 @@ export default function Home() {
             viewAllLink="/category/drama-box-hidden-gems"
           />
 
-          {/* 6. Short TV */}
           <CategoryRow
-            title="Hot TV"
-            icon={<MonitorPlay className="w-5 h-5 md:w-6 md:h-6 fill-current" />}
+            title="Short TV"
+            icon={<Smartphone className="w-5 h-5 md:w-6 md:h-6 fill-current" />}
             items={getItems(shortTv)}
             isLoading={loadingShortTv}
             viewAllLink="/category/short-tv"
           />
 
-          {/* 7. Adult Comedy */}
           <CategoryRow
-            title="Canda Dewasa"
+            title="Yang Hot-Hot"
             icon={<Laugh className="w-5 h-5 md:w-6 md:h-6 fill-current" />}
             items={getItems(adultComedy)}
             isLoading={loadingAdultComedy}
             viewAllLink="/category/adult-comedy"
           />
 
-          {/* 8. Western TV */}
           <CategoryRow
-            title="Western TV"
-            icon={<Tv className="w-5 h-5 md:w-6 md:h-6" />}
+            title="TV Barat"
+            icon={<Globe className="w-5 h-5 md:w-6 md:h-6" />}
             items={getItems(westernTv)}
             isLoading={loadingWesternTv}
             viewAllLink="/category/western-tv"

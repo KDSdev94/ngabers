@@ -50,8 +50,8 @@ export function VideoPlayer({ url }: VideoPlayerProps) {
           </div>
           <h3 className="text-xl font-bold text-white mb-2">Gagal Memuat Video</h3>
           <p className="text-white/60 text-sm max-w-sm mb-8">
-            Server sedang sibuk atau koneksi internet kamu terblokir.
-            Coba gunakan VPN atau ganti jaringan internet.
+            Server lagi sibuk atau koneksi internet kamu ngelag.
+            Coba pake VPN atau ganti jaringan internet.
           </p>
           <button
             onClick={handleRetry}

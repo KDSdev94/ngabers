@@ -10,26 +10,26 @@ import { Button } from "@/components/ui/button";
 import { type MovieItem } from "@shared/schema";
 
 function HeroSlideItem({ movie }: { movie: MovieItem }) {
-  // Fetch detail if description is missing to ensure synopsis appears
-  const { data: detail } = useMovieDetail(!movie.description ? movie.detailPath : null);
+  // Pre-fetch detail so the "Tonton Sekarang" button has the player/episode data ready
+  const { data: detail } = useMovieDetail(movie.detailPath);
   const displayMovie = detail || movie;
 
   return (
     <div className="relative w-full h-full">
-      {/* Background Image with Blur/Dim */}
-      <div className="absolute inset-0">
+      {/* Background Layer - Strictly non-interactive */}
+      <div className="absolute inset-0 z-0 pointer-events-none select-none">
         <img
           src={displayMovie.poster}
           alt={displayMovie.title}
           className="w-full h-full object-cover object-top opacity-70 md:opacity-100"
         />
-        {/* Complex Gradients for Cinematic Look */}
+        {/* Cinematic Gradients */}
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-background via-background/20 to-transparent md:via-background/40" />
       </div>
 
-      {/* Content Container */}
-      <div className="absolute inset-0 container mx-auto px-4 flex items-end pb-20 md:pb-0 md:items-center md:pt-32">
+      {/* Content Layer - High Z-index to stay above the overlap section */}
+      <div className="absolute inset-0 z-50 container mx-auto px-4 flex flex-col justify-end pb-20 md:pb-0 md:justify-center md:pt-32 pointer-events-auto">
         <div className="max-w-2xl space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both">
 
           {/* Badge Category */}
@@ -41,7 +41,7 @@ function HeroSlideItem({ movie }: { movie: MovieItem }) {
           </div>
 
           {/* Title */}
-          <h1 className="text-3xl md:text-8xl font-display font-black text-white leading-tight tracking-tight drop-shadow-lg line-clamp-2 md:line-clamp-none">
+          <h1 className="text-3xl md:text-6xl lg:text-7xl font-display font-black text-white leading-tight tracking-tight drop-shadow-lg line-clamp-2 md:line-clamp-none">
             {displayMovie.title}
           </h1>
 
@@ -58,20 +58,31 @@ function HeroSlideItem({ movie }: { movie: MovieItem }) {
           </div>
 
           {/* Description / Synopsis */}
-          <p className="text-xs md:text-base text-gray-300 w-full md:w-3/4 line-clamp-3 leading-relaxed hidden md:block">
-            {displayMovie.description || "Sinopsis tidak tersedia untuk judul ini. Tonton sekarang untuk mengetahui cerita lengkapnya!"}
-          </p>
-          <p className="text-xs text-gray-300 line-clamp-2 leading-relaxed md:hidden">
-            {displayMovie.description || "Sinopsis tidak tersedia untuk judul ini. Tonton sekarang!"}
-          </p>
+          <div className="md:w-3/4">
+            <p className="text-xs md:text-base text-gray-300 leading-relaxed line-clamp-2 md:line-clamp-3">
+              {displayMovie.description || "Sinopsis tidak tersedia untuk judul ini. Tonton sekarang untuk mengetahui cerita lengkapnya!"}
+            </p>
+          </div>
 
-          {/* Actions */}
           {/* Actions */}
           <div className="flex items-center gap-3 md:gap-4 pt-2 md:pt-4">
             <Button
               size="lg"
               className="h-10 md:h-14 px-5 md:px-8 rounded-lg bg-white hover:bg-white/90 text-black font-extrabold text-xs md:text-base transition-transform hover:scale-105"
-              onClick={() => window.location.href = `/detail?path=${encodeURIComponent(displayMovie.detailPath || "")}`}
+              onClick={() => {
+                // If it's a TV series, we need to get the first episode
+                if (detail?.seasons?.[0]?.episodes?.[0]) {
+                  const firstEp = detail.seasons[0].episodes[0];
+                  window.location.href = `/watch?url=${encodeURIComponent(firstEp.playerUrl || firstEp.url)}&title=${encodeURIComponent(displayMovie.title)}&path=${encodeURIComponent(displayMovie.detailPath)}`;
+                } else if (displayMovie.type === 'movie') {
+                  // For movies, we go to detail first or direct if we had the URL, 
+                  // but usually we go to detail to fetch the player URL
+                  window.location.href = `/detail?path=${encodeURIComponent(displayMovie.detailPath)}`;
+                } else {
+                  // Fallback to detail page if data isn't ready
+                  window.location.href = `/detail?path=${encodeURIComponent(displayMovie.detailPath)}`;
+                }
+              }}
             >
               <Play className="w-4 h-4 md:w-5 md:h-5 mr-2 fill-black" />
               Tonton Sekarang
@@ -107,12 +118,13 @@ export function HeroSlider() {
   const slides = data.items.slice(0, 5);
 
   return (
-    <div className="relative w-full h-[60vh] md:h-[85vh] group">
+    <div className="relative z-40 w-full h-[60vh] md:h-[85vh] group">
       <Swiper
         modules={[Autoplay, EffectFade, Pagination]}
         effect="fade"
         speed={1000}
         autoplay={{ delay: 6000, disableOnInteraction: false }}
+        allowTouchMove={false}
         pagination={{
           clickable: true,
           modifierClass: 'swiper-pagination-custom-',
