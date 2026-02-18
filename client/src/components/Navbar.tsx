@@ -192,7 +192,7 @@ export function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            className="fixed top-16 left-0 right-0 bg-background/95 backdrop-blur-xl border-b border-white/10 z-40 md:hidden overflow-hidden"
+            className="fixed top-16 left-0 right-0 bg-background/95 backdrop-blur-xl border-b border-white/10 z-[60] md:hidden overflow-hidden"
           >
             <nav className="flex flex-col p-4 gap-2">
               {[

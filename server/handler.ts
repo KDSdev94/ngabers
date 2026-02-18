@@ -11,6 +11,27 @@ const COMMON_HEADERS = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 };
 
+/**
+ * Memperbaiki URL gambar yang dibungkus oleh proxy yang rusak
+ */
+function cleanProxyUrl(url: string | null | undefined): string {
+    if (!url) return "";
+    if (url.includes("image-proxy.php?url=")) {
+        try {
+            const parts = url.split("url=");
+            if (parts.length > 1) {
+                // Decode base64 dari parameter url=
+                const decoded = Buffer.from(parts[1], 'base64').toString('utf-8');
+                return decoded;
+            }
+        } catch (e) {
+            console.error("[Cleaner] Gagal decode proxy URL:", e);
+        }
+    }
+    return url;
+}
+
+
 async function fetchPagedData(
     requestPage: number,
     fetchFn: (p: number) => Promise<any>
@@ -86,7 +107,7 @@ async function fetchFromDramaBox(endpoint: string, page: number = 1) {
             items: itemsList.map((item: any) => ({
                 id: `db-${item.id}`,
                 title: item.title,
-                poster: item.cover_image,
+                poster: cleanProxyUrl(item.cover_image),
                 rating: Number((9.0 + (Math.random() * 0.8)).toFixed(1)),
                 year: "",
                 type: "tv",
@@ -150,7 +171,7 @@ async function fetchDramaBoxDetail(id: string) {
         return {
             id: `db-${drama.id || id}`,
             title: drama.title || "DramaBox Drama",
-            poster: drama.cover_image || "",
+            poster: cleanProxyUrl(drama.cover_image),
             description: drama.introduction || "No description available.",
             genre: drama.tags?.join(", ") || drama.genre || "",
             type: "tv",
@@ -190,7 +211,7 @@ async function fetchFromBotraiki(endpoint: string, page: number = 1) {
                 return {
                     id: `bt-${item.bookId || item.id}`,
                     title: item.bookName || item.title,
-                    poster: item.coverWap || item.cover || item.bookCover,
+                    poster: cleanProxyUrl(item.coverWap || item.cover || item.bookCover),
                     rating: Number(rating.toFixed(1)),
                     year: item.shelfTime?.split(' ')[0]?.split('-')[0] || "",
                     type: "tv",
@@ -261,7 +282,7 @@ async function fetchBotraikiDetail(bookId: string) {
         return {
             id: `bt-${bookInfo.bookId || bookId}`,
             title: bookInfo.bookName || bookInfo.title || "Unknown Title",
-            poster: bookInfo.coverWap || bookInfo.cover || bookInfo.bookCover || "",
+            poster: cleanProxyUrl(bookInfo.coverWap || bookInfo.cover || bookInfo.bookCover),
             description: bookInfo.introduction || "",
             genre: bookInfo.tags?.join(", ") || "",
             type: "tv",
@@ -332,6 +353,15 @@ export async function handleApiRequest(path: string, method: string, query: any,
                     });
                 }
             }
+
+            // Clean posters for main API results
+            if (data && Array.isArray(data.items)) {
+                data.items = data.items.map((item: any) => ({
+                    ...item,
+                    poster: cleanProxyUrl(item.poster)
+                }));
+            }
+
             return data;
         };
 
@@ -370,7 +400,10 @@ export async function handleApiRequest(path: string, method: string, query: any,
         if (!resp.ok) throw new Error("Detail fetch failed");
         const data = await resp.json();
         const finalData = data.data || data;
-        if (finalData && !finalData.rating) finalData.rating = "8.9";
+        if (finalData) {
+            finalData.poster = cleanProxyUrl(finalData.poster);
+            if (!finalData.rating) finalData.rating = "8.9";
+        }
         return finalData;
     }
 
