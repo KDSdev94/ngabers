@@ -4,9 +4,9 @@ import { Navbar } from "@/components/Navbar";
 import { RecommendationSection } from "@/components/RecommendationSection";
 import { Footer } from "@/components/Footer";
 import {
-  Loader2, Star, PlayCircle, History,
-  Search, FastForward, Calendar, Globe,
-  Clapperboard, Users, MapPin, Info
+  Loader2, Star, Play,
+  Search, Calendar, Globe,
+  Clapperboard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useMemo } from "react";
@@ -83,7 +83,7 @@ export default function Detail() {
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <Navbar />
 
-      {/* Hero Section - Cinematic Layout */}
+      {/* Hero Section - Cinematic Layout (Original Ngabers) */}
       <section className="relative w-full min-h-[85vh] flex items-end md:items-center py-20 overflow-hidden">
         {/* Backdrop Background */}
         <div className="absolute inset-0 z-0">
@@ -142,7 +142,7 @@ export default function Detail() {
               {/* Genre Pills */}
               <div className="flex flex-wrap gap-2 pt-2">
                 {movie.genre?.split(',').map((g: string) => (
-                  <span key={g} className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-xs font-bold hover:bg-primary/20 hover:border-primary/50 transition-all cursor-default">
+                  <span key={g} className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/80 text-xs font-bold hover:bg-red-500/20 hover:border-red-500/50 transition-all cursor-default">
                     {g.trim()}
                   </span>
                 ))}
@@ -153,12 +153,11 @@ export default function Detail() {
                 {movie.description || "Jelajahi petualangan luar biasa dalam judul ini. Sinopsis lengkap akan segera diperbarui untuk pengalaman menonton yang lebih baik."}
               </p>
 
-
               {/* Action */}
               <div className="pt-4">
                 <Button
                   size="xl"
-                  className="w-full md:w-auto h-14 px-10 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-lg shadow-xl shadow-primary/30 group active:scale-95 transition-all"
+                  className="w-full md:w-auto h-14 px-10 rounded-2xl bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-black text-lg shadow-xl shadow-red-500/30 group active:scale-95 transition-all"
                   onClick={() => {
                     const firstEp = currentSeason?.episodes?.[0];
                     if (movie.playerUrl && !currentSeason?.episodes?.length) {
@@ -168,7 +167,7 @@ export default function Detail() {
                     }
                   }}
                 >
-                  <PlayCircle className="w-6 h-6 mr-3 fill-current group-hover:scale-110 transition-transform" />
+                  <Play className="w-6 h-6 mr-3 fill-current group-hover:scale-110 transition-transform" />
                   Tonton Sekarang
                 </Button>
               </div>
@@ -177,66 +176,50 @@ export default function Detail() {
         </div>
       </section>
 
-      {/* Episodes Section - Only show for series */}
+      {/* Episodes Section - Layout seperti Mizunime (Only show for series) */}
       {movie.type === "tv" && (
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-6xl mx-auto space-y-10">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-white/5 pb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
-                  <History className="w-6 h-6 text-primary" />
-                </div>
-                <h2 className="text-3xl font-display font-black text-white tracking-tight uppercase">Episodes</h2>
-              </div>
+        <div className="container mx-auto px-4 py-8 -mt-8">
+          <div className="max-w-6xl mx-auto">
+            {/* Section Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <h3 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
+                <span className="w-1.5 h-8 bg-red-500 rounded-full"></span>
+                Episodes ({currentSeason?.episodes?.length || 0})
+              </h3>
 
-              <div className="flex flex-wrap items-center gap-4">
-                {/* Episode Search */}
-                <div className="relative group w-full md:w-64">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-primary transition-colors" />
-                  <input
-                    type="text"
-                    placeholder="Cari episode..."
-                    value={episodeSearch}
-                    onChange={(e) => setEpisodeSearch(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-3 pl-11 pr-4 text-sm text-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all placeholder:text-white/20"
-                  />
-                </div>
-
-                {/* "Episode Terakhir" Shortcut */}
-                <Button
-                  variant="outline"
-                  className="rounded-2xl bg-primary/10 border border-primary/20 text-primary hover:bg-primary hover:text-white transition-all font-bold h-12"
-                  onClick={() => {
-                    const lastEp = currentSeason?.episodes?.[currentSeason.episodes.length - 1];
-                    if (lastEp) handleWatch(lastEp.playerUrl || lastEp.url, lastEp.title || `Episode ${lastEp.episode}`);
-                  }}
-                >
-                  <FastForward className="w-4 h-4 mr-2" />
-                  Episode Terakhir
-                </Button>
-
-                {/* Season Selector */}
-                {movie.seasons && movie.seasons.length > 1 && (
-                  <Select value={selectedSeason || ""} onValueChange={setSelectedSeason}>
-                    <SelectTrigger className="w-full md:w-48 h-12 bg-white/5 border-white/10 text-white rounded-2xl font-bold">
-                      <SelectValue placeholder="Pilih Season" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-2xl">
-                      {movie.seasons.map((s, i) => {
-                        const name = s.name || `Season ${s.season}` || "Season 1";
-                        return (
-                          <SelectItem key={i} value={name} className="focus:bg-primary focus:text-white cursor-pointer py-3 font-bold">
-                            {name}
-                          </SelectItem>
-                        );
-                      })}
-                    </SelectContent>
-                  </Select>
-                )}
+              {/* Episode Search */}
+              <div className="relative w-full sm:w-56">
+                <input
+                  type="text"
+                  placeholder="Search episode..."
+                  value={episodeSearch}
+                  onChange={(e) => setEpisodeSearch(e.target.value)}
+                  className="w-full bg-white/5 border border-white/10 rounded-full py-2 px-4 pl-10 text-sm focus:border-red-500 focus:ring-2 focus:ring-red-500/20 text-white placeholder-white/30 outline-none transition-all"
+                />
+                <Search className="w-4 h-4 absolute left-3.5 top-2.5 text-white/40" />
               </div>
             </div>
 
-            {/* Episode Grid */}
+            {/* Season Selector */}
+            {movie.seasons && movie.seasons.length > 1 && (
+              <Select value={selectedSeason || ""} onValueChange={setSelectedSeason}>
+                <SelectTrigger className="w-full md:w-48 h-11 bg-white/5 border-white/10 text-white rounded-xl font-bold text-sm mb-6">
+                  <SelectValue placeholder="Pilih Season" />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-xl">
+                  {movie.seasons.map((s, i) => {
+                    const name = s.name || `Season ${s.season}` || "Season 1";
+                    return (
+                      <SelectItem key={i} value={name} className="focus:bg-red-500 focus:text-white cursor-pointer py-2 font-bold text-sm">
+                        {name}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            )}
+
+            {/* Episode Grid - 2 cols mobile, responsive desktop */}
             <AnimatePresence mode="wait">
               {filteredEpisodes.length > 0 ? (
                 <motion.div
@@ -244,43 +227,34 @@ export default function Detail() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar"
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-[500px] overflow-y-auto p-1 custom-scrollbar">
                     {filteredEpisodes.map((ep, idx) => {
                       const title = ep.title || `Episode ${ep.episode || idx + 1}`;
                       return (
-                        <motion.button
+                        <Button
                           key={idx}
-                          whileHover={{ scale: 1.03, y: -5 }}
-                          whileTap={{ scale: 0.98 }}
+                          variant="secondary"
+                          className="bg-zinc-900 hover:bg-red-900 border border-white/5 hover:border-red-500/50 transition-all h-auto flex-col items-start p-3 rounded-xl"
                           onClick={() => handleWatch(ep.playerUrl || ep.url, title)}
-                          className="group relative bg-white/5 border border-white/10 rounded-2xl p-5 text-left transition-all hover:bg-white/10 hover:border-primary/50 overflow-hidden"
                         >
-                          <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-100 group-hover:text-primary transition-all">
-                            <PlayCircle className="w-6 h-6" />
-                          </div>
-                          <div className="space-y-1 relative z-10">
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 group-hover:text-primary transition-colors">
-                              Episode {ep.episode || idx + 1}
-                            </span>
-                            <h4 className="text-white font-bold text-lg group-hover:text-shadow-glow transition-all line-clamp-1">
-                              {title}
-                            </h4>
-                          </div>
-                          {/* Hover Glow */}
-                          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </motion.button>
+                          <span className="text-white/60 text-xs text-left mb-1 w-full truncate">
+                            {ep.title || `Episode ${ep.episode || idx + 1}`}
+                          </span>
+                          <span className="text-white font-bold text-sm">
+                            Episode {ep.episode || idx + 1}
+                          </span>
+                        </Button>
                       );
                     })}
                   </div>
                 </motion.div>
               ) : (
-                <div className="py-20 text-center space-y-4 bg-white/5 rounded-3xl border border-dashed border-white/10">
+                <div className="py-20 text-center space-y-4 bg-white/5 rounded-xl border border-dashed border-white/10">
                   <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto">
-                    <Search className="w-8 h-8 text-white/10" />
+                    <Search className="w-8 h-8 text-white/20" />
                   </div>
-                  <p className="text-white/40 font-bold uppercase tracking-widest text-sm">Tidak ada episode ditemukan</p>
+                  <p className="text-white/40 font-bold text-sm">Tidak ada episode ditemukan</p>
                 </div>
               )}
             </AnimatePresence>

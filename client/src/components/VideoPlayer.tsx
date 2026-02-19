@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Loader2, AlertCircle, RefreshCw, Maximize, Minimize } from "lucide-react";
 
 interface VideoPlayerProps {
   url: string;
@@ -9,6 +9,28 @@ export function VideoPlayer({ url }: VideoPlayerProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Handle fullscreen change & auto-rotate
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      const isFs = document.fullscreenElement !== null;
+      setIsFullscreen(isFs);
+
+      // Auto-rotate to landscape when entering fullscreen
+      if (isFs && screen.orientation) {
+        screen.orientation.lock('landscape').catch((err) => {
+          console.log('Screen orientation lock not supported or failed:', err);
+        });
+      } else if (!isFs && screen.orientation) {
+        screen.orientation.unlock();
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
   // Handle timeout
   useEffect(() => {
@@ -25,6 +47,24 @@ export function VideoPlayer({ url }: VideoPlayerProps) {
     return () => clearTimeout(timer);
   }, [loading, retryCount]);
 
+  const toggleFullscreen = async () => {
+    if (!containerRef.current) return;
+
+    if (!document.fullscreenElement) {
+      try {
+        await containerRef.current.requestFullscreen();
+      } catch (err) {
+        console.error('Failed to enter fullscreen:', err);
+      }
+    } else {
+      try {
+        await document.exitFullscreen();
+      } catch (err) {
+        console.error('Failed to exit fullscreen:', err);
+      }
+    }
+  };
+
   if (!url) return null;
 
   const handleRetry = () => {
@@ -34,7 +74,10 @@ export function VideoPlayer({ url }: VideoPlayerProps) {
   };
 
   return (
-    <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl shadow-black/50 ring-1 ring-white/10 group">
+    <div 
+      ref={containerRef}
+      className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl shadow-black/50 ring-1 ring-white/10 group"
+    >
       {loading && !error && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-zinc-900 z-10">
           <Loader2 className="w-10 h-10 text-primary animate-spin mb-4" />
@@ -78,6 +121,15 @@ export function VideoPlayer({ url }: VideoPlayerProps) {
           }}
         />
       )}
+
+      {/* Fullscreen Toggle Button */}
+      <button
+        onClick={toggleFullscreen}
+        className="absolute top-4 right-4 p-2 bg-black/60 hover:bg-black/80 rounded-lg text-white/80 hover:text-white transition-all opacity-0 group-hover:opacity-100 z-20"
+        title={isFullscreen ? "Keluar fullscreen" : "Fullscreen"}
+      >
+        {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+      </button>
 
       {/* Cinematic Vignette */}
       <div className="absolute inset-0 pointer-events-none shadow-[inset_0_0_100px_rgba(0,0,0,0.5)] rounded-2xl" />
