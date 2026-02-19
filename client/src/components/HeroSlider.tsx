@@ -68,7 +68,7 @@ function HeroSlideItem({ movie }: { movie: MovieItem }) {
           <div className="flex items-center gap-3 md:gap-4 pt-2 md:pt-4">
             <Button
               size="lg"
-              className="h-10 md:h-14 px-5 md:px-8 rounded-lg bg-white hover:bg-white/90 text-black font-extrabold text-xs md:text-base transition-transform hover:scale-105"
+              className="flex-1 md:flex-none h-10 md:h-14 px-4 md:px-8 rounded-lg bg-white hover:bg-white/90 text-black font-black text-xs md:text-base transition-all hover:scale-105 active:scale-95 shadow-lg shadow-white/5"
               onClick={() => {
                 // If it's a TV series, we need to get the first episode
                 if (detail?.seasons?.[0]?.episodes?.[0]) {
@@ -84,16 +84,16 @@ function HeroSlideItem({ movie }: { movie: MovieItem }) {
                 }
               }}
             >
-              <Play className="w-4 h-4 md:w-5 md:h-5 mr-2 fill-black" />
+              <Play className="w-3.5 h-3.5 md:w-5 md:h-5 mr-1.5 md:mr-2 fill-black" />
               Tonton Sekarang
             </Button>
 
             <Button
               size="lg"
-              className="h-10 md:h-14 px-5 md:px-8 rounded-lg bg-white/20 hover:bg-white/30 text-white font-bold text-xs md:text-base backdrop-blur-md border border-white/10 transition-transform hover:scale-105"
+              className="flex-1 md:flex-none h-10 md:h-14 px-4 md:px-8 rounded-lg bg-white/20 hover:bg-white/30 text-white font-bold text-xs md:text-base backdrop-blur-md border border-white/10 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-black/10"
               onClick={() => window.location.href = `/detail?path=${encodeURIComponent(displayMovie.detailPath || "")}`}
             >
-              <Info className="w-4 h-4 md:w-5 md:h-5 mr-2" />
+              <Info className="w-3.5 h-3.5 md:w-5 md:h-5 mr-1.5 md:mr-2" />
               Info Lengkap
             </Button>
           </div>

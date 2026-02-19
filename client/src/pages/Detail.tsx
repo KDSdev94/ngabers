@@ -158,7 +158,7 @@ export default function Detail() {
               <div className="pt-4">
                 <Button
                   size="xl"
-                  className="rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-lg h-14 px-10 shadow-xl shadow-primary/30 group"
+                  className="w-full md:w-auto h-14 px-10 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-lg shadow-xl shadow-primary/30 group active:scale-95 transition-all"
                   onClick={() => {
                     const firstEp = currentSeason?.episodes?.[0];
                     if (movie.playerUrl && !currentSeason?.episodes?.length) {
