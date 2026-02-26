@@ -5,12 +5,13 @@ import { VideoPlayer } from "@/components/VideoPlayer";
 import { MovieCard } from "@/components/MovieCard";
 import { RecommendationSection } from "@/components/RecommendationSection";
 import { Footer } from "@/components/Footer";
-import { ArrowLeft, ArrowRight, Share2, Info, ChevronLeft, Star, Calendar, Globe, Maximize, Minimize } from "lucide-react";
+import { ArrowLeft, ArrowRight, Share2, Info, ChevronLeft, Star, Calendar, Globe, Maximize, Minimize, SkipForward, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useMemo, useRef, useCallback } from "react";
+import { saveProgress, markCompleted, getProgress, formatMinutes } from "@/lib/watchProgress";
 import {
     Select,
     SelectContent,
@@ -19,12 +20,26 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 
+// How many minutes into an episode before showing the "Next Episode" button.
+// For a typical 24-min anime episode, showing it at minute 21 (~3 min before end).
+const NEXT_EP_THRESHOLD_MINUTES = 21;
+
+// Save progress every N seconds
+const PROGRESS_SAVE_INTERVAL_SECONDS = 30;
+
 export default function Watch() {
     const [location, setLocation] = useLocation();
     const [copied, setCopied] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [isIdle, setIsIdle] = useState(false);
     const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Watch progress state
+    const [watchMinutes, setWatchMinutes] = useState(0);
+    const [showNextEpBanner, setShowNextEpBanner] = useState(false);
+    const [bannerDismissed, setBannerDismissed] = useState(false);
+    const watchTimerRef = useRef<NodeJS.Timeout | null>(null);
+    const watchStartRef = useRef<number>(Date.now());
 
     // Handle Idle State (Auto-hide controls)
     useEffect(() => {
@@ -119,7 +134,54 @@ export default function Watch() {
         };
     }, [movie, currentUrl]);
 
+    // ── Watch Progress Timer ──────────────────────────────────────────────────
+    // Because the player is an iframe (cross-origin), we can't read actual playback
+    // time. Instead, we run a wall-clock timer from when the page loads.
+    useEffect(() => {
+        if (!currentUrl) return;
 
+        // Reset on new URL
+        setWatchMinutes(0);
+        setShowNextEpBanner(false);
+        setBannerDismissed(false);
+        watchStartRef.current = Date.now();
+
+        watchTimerRef.current = setInterval(() => {
+            const elapsed = (Date.now() - watchStartRef.current) / 60000; // minutes
+            setWatchMinutes(elapsed);
+
+            // Save progress every PROGRESS_SAVE_INTERVAL_SECONDS
+            if (Math.round(elapsed * 60) % PROGRESS_SAVE_INTERVAL_SECONDS === 0) {
+                saveProgress(currentUrl, elapsed);
+            }
+
+            // Show "next episode" banner for series only
+            if (elapsed >= NEXT_EP_THRESHOLD_MINUTES) {
+                saveProgress(currentUrl, elapsed, true);
+                markCompleted(currentUrl);
+            }
+        }, 1000);
+
+        return () => {
+            if (watchTimerRef.current) clearInterval(watchTimerRef.current);
+            // Save on unmount
+            const elapsed = (Date.now() - watchStartRef.current) / 60000;
+            if (elapsed > 0.5 && currentUrl) saveProgress(currentUrl, elapsed);
+        };
+    }, [currentUrl]);
+
+    // Show next-ep banner when threshold is hit (series + nextEp exists)
+    useEffect(() => {
+        if (
+            watchMinutes >= NEXT_EP_THRESHOLD_MINUTES &&
+            !bannerDismissed &&
+            nextEp &&
+            movie?.seasons?.length
+        ) {
+            setShowNextEpBanner(true);
+        }
+    }, [watchMinutes, bannerDismissed, nextEp, movie]);
+    // ─────────────────────────────────────────────────────────────────────────
 
     if (!currentUrl) {
 
@@ -260,6 +322,42 @@ export default function Watch() {
                                 {isFullscreen && isIdle && (
                                     <div className="absolute inset-0 z-50 bg-black/0" />
                                 )}
+
+                                {/* ── Next Episode Banner (Series only) ── */}
+                                <AnimatePresence>
+                                    {showNextEpBanner && nextEp && (
+                                        <motion.div
+                                            initial={{ y: 100, opacity: 0 }}
+                                            animate={{ y: 0, opacity: 1 }}
+                                            exit={{ y: 100, opacity: 0 }}
+                                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                            className="absolute bottom-4 left-4 right-4 z-30 flex items-center justify-between gap-3 bg-black/80 backdrop-blur-md border border-white/10 rounded-2xl px-4 py-3"
+                                        >
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <CheckCircle2 className="w-4 h-4 text-green-400 shrink-0" />
+                                                <div className="min-w-0">
+                                                    <p className="text-white/50 text-[10px] font-bold uppercase tracking-widest leading-none mb-0.5">Episode Selanjutnya</p>
+                                                    <p className="text-white font-black text-sm truncate">{nextEp.title || `Episode ${nextEp.episode}`}</p>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-2 shrink-0">
+                                                <button
+                                                    onClick={() => setBannerDismissed(true)}
+                                                    className="text-white/40 hover:text-white text-xs font-bold transition-colors px-2 py-1"
+                                                >
+                                                    Tutup
+                                                </button>
+                                                <button
+                                                    onClick={() => navigateToEpisode(nextEp)}
+                                                    className="flex items-center gap-1.5 bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white font-black text-sm px-4 py-2 rounded-xl transition-all active:scale-95 shadow-lg shadow-red-900/40"
+                                                >
+                                                    <SkipForward className="w-4 h-4" />
+                                                    Lanjut
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
 
                             {/* Episodes Sidebar Column */}
@@ -297,21 +395,56 @@ export default function Watch() {
                                         {currentSeasonData?.episodes?.map((ep, idx) => {
                                             const epNum = ep.episode || (idx + 1).toString();
                                             const isActive = ep.playerUrl === currentUrl || ep.url === currentUrl;
+                                            const epUrl = ep.playerUrl || ep.url;
+                                            const epProgress = epUrl ? getProgress(epUrl) : null;
+                                            const epCompleted = epProgress?.completed ?? false;
+                                            const epHasProgress = !epCompleted && (epProgress?.minutes ?? 0) > 0.5;
                                             return (
                                                 <button
                                                     key={idx}
                                                     onClick={() => navigateToEpisode(ep)}
-                                                    className={`w-full group flex items-center gap-2.5 p-2 rounded-xl transition-all ${isActive ? "bg-primary/20 border border-primary/30" : "bg-white/5 border border-transparent hover:bg-white/10"
+                                                    className={`w-full group flex items-center gap-2.5 p-2 rounded-xl transition-all relative overflow-hidden ${isActive
+                                                        ? "bg-primary/20 border border-primary/30"
+                                                        : epCompleted
+                                                            ? "bg-green-900/10 border border-green-500/20 hover:bg-green-900/20"
+                                                            : epHasProgress
+                                                                ? "bg-orange-900/10 border border-orange-500/20 hover:bg-white/10"
+                                                                : "bg-white/5 border border-transparent hover:bg-white/10"
                                                         }`}
                                                 >
-                                                    <div className={`w-7 h-7 shrink-0 rounded-lg flex items-center justify-center font-black text-[10px] transition-colors ${isActive ? "bg-primary text-white" : "bg-white/10 text-white/40 group-hover:bg-primary/20 group-hover:text-primary"
+                                                    {/* progress bar bottom */}
+                                                    {epHasProgress && (
+                                                        <div
+                                                            className="absolute bottom-0 left-0 h-[2px] bg-orange-500/60 rounded-full"
+                                                            style={{ width: `${Math.min((epProgress!.minutes / 21) * 100, 95)}%` }}
+                                                        />
+                                                    )}
+                                                    {epCompleted && (
+                                                        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-green-500/60 rounded-full" />
+                                                    )}
+
+                                                    <div className={`w-7 h-7 shrink-0 rounded-lg flex items-center justify-center font-black text-[10px] transition-colors ${isActive
+                                                        ? "bg-primary text-white"
+                                                        : epCompleted
+                                                            ? "bg-green-500/20 text-green-400"
+                                                            : epHasProgress
+                                                                ? "bg-orange-500/20 text-orange-400"
+                                                                : "bg-white/10 text-white/40 group-hover:bg-primary/20 group-hover:text-primary"
                                                         }`}>
-                                                        {epNum}
+                                                        {epCompleted ? <CheckCircle2 className="w-3.5 h-3.5" /> : epNum}
                                                     </div>
-                                                    <span className={`text-xs font-bold truncate transition-colors ${isActive ? "text-white" : "text-white/60 group-hover:text-white"
-                                                        }`}>
-                                                        {ep.title || `Episode ${epNum}`}
-                                                    </span>
+                                                    <div className="flex-1 min-w-0">
+                                                        <span className={`text-xs font-bold block truncate transition-colors ${isActive ? "text-white" : epCompleted ? "text-green-300/80" : "text-white/60 group-hover:text-white"
+                                                            }`}>
+                                                            {ep.title || `Episode ${epNum}`}
+                                                        </span>
+                                                        {epHasProgress && (
+                                                            <span className="text-orange-400/70 text-[9px] font-bold">{formatMinutes(epProgress!.minutes)}</span>
+                                                        )}
+                                                        {epCompleted && (
+                                                            <span className="text-green-400/70 text-[9px] font-bold">Selesai</span>
+                                                        )}
+                                                    </div>
                                                 </button>
                                             );
                                         })}

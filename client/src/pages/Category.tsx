@@ -18,7 +18,7 @@ import {
   Laugh,
   Globe,
   Mic2,
-  Star
+  Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -35,7 +35,7 @@ const CATEGORY_TITLES: Record<string, string> = {
   "indo-dub": "Dub Indo Terbaik!",
   "drama-box": "Drama Box Specials",
   "drama-box-must-sees": "Drama Box: Rekomendasi untukmu",
-  "drama-box-hidden-gems": "Drama Box: Hidden Gems"
+  "drama-box-hidden-gems": "Drama Box: Hidden Gems",
 };
 
 // Helper to format category/genre slug to title

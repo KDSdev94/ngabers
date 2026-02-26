@@ -6,10 +6,11 @@ import { Footer } from "@/components/Footer";
 import {
   Loader2, Star, Play,
   Search, Calendar, Globe,
-  Clapperboard
+  Clapperboard, CheckCircle2, Clock, Info
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useMemo } from "react";
+import { getProgress, formatMinutes } from "@/lib/watchProgress";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Select,
@@ -184,7 +185,7 @@ export default function Detail() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <h3 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
                 <span className="w-1.5 h-8 bg-red-500 rounded-full"></span>
-                Episodes ({currentSeason?.episodes?.length || 0})
+                Episode ({currentSeason?.episodes?.length || 0})
               </h3>
 
               {/* Episode Search */}
@@ -231,19 +232,57 @@ export default function Detail() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-[500px] overflow-y-auto p-1 custom-scrollbar">
                     {filteredEpisodes.map((ep, idx) => {
                       const title = ep.title || `Episode ${ep.episode || idx + 1}`;
+                      const epUrl = ep.playerUrl || ep.url;
+                      const progress = epUrl ? getProgress(epUrl) : null;
+                      const isCompleted = progress?.completed ?? false;
+                      const hasProgress = !isCompleted && (progress?.minutes ?? 0) > 0.5;
                       return (
                         <Button
                           key={idx}
                           variant="secondary"
-                          className="bg-zinc-900 hover:bg-red-900 border border-white/5 hover:border-red-500/50 transition-all h-auto flex-col items-start p-3 rounded-xl"
+                          className={`relative overflow-hidden bg-zinc-900 hover:bg-red-900 border transition-all h-auto flex-col items-start p-3 rounded-xl ${isCompleted
+                            ? "border-green-500/30 bg-green-900/10"
+                            : hasProgress
+                              ? "border-orange-500/30"
+                              : "border-white/5 hover:border-red-500/50"
+                            }`}
                           onClick={() => handleWatch(ep.playerUrl || ep.url, title)}
                         >
-                          <span className="text-white/60 text-xs text-left mb-1 w-full truncate">
-                            {ep.title || `Episode ${ep.episode || idx + 1}`}
-                          </span>
+                          {/* Progress bar */}
+                          {hasProgress && (
+                            <div
+                              className="absolute bottom-0 left-0 h-0.5 bg-orange-500/70 rounded-full"
+                              style={{ width: `${Math.min((progress!.minutes / 21) * 100, 95)}%` }}
+                            />
+                          )}
+                          {isCompleted && (
+                            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500/70 rounded-full" />
+                          )}
+
+                          <div className="w-full flex items-start justify-between gap-1 mb-1">
+                            <span className="text-white/60 text-xs text-left truncate flex-1">
+                              {ep.title || `Episode ${ep.episode || idx + 1}`}
+                            </span>
+                            {isCompleted && (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                            )}
+                            {hasProgress && (
+                              <Clock className="w-3 h-3 text-orange-400 shrink-0" />
+                            )}
+                          </div>
                           <span className="text-white font-bold text-sm">
                             Episode {ep.episode || idx + 1}
                           </span>
+                          {hasProgress && (
+                            <span className="text-orange-400/80 text-[10px] font-bold mt-0.5">
+                              {formatMinutes(progress!.minutes)}
+                            </span>
+                          )}
+                          {isCompleted && (
+                            <span className="text-green-400/80 text-[10px] font-bold mt-0.5">
+                              Sudah ditonton
+                            </span>
+                          )}
                         </Button>
                       );
                     })}

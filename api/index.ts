@@ -234,6 +234,7 @@ async function fetchBotraikiDetail(bookId: string) {
     }
 }
 
+
 // Main API Handler
 async function handleApiRequest(path: string, method: string, query: any, body: any): Promise<any> {
     // 1. Category List: /api/movies/:category
@@ -251,6 +252,7 @@ async function handleApiRequest(path: string, method: string, query: any, body: 
             else if (category === 'drama-box-hidden-gems') endpoint = '/dramas/hidden-gems';
             return await fetchFromDramaBox(endpoint, Number(page));
         }
+
 
         const CURATED_ACTIONS = [
             'trending',

@@ -297,6 +297,7 @@ async function fetchBotraikiDetail(bookId: string) {
     }
 }
 
+
 // Pure Handler Function
 export async function handleApiRequest(path: string, method: string, query: any, body: any): Promise<any> {
     // 1. Category List: /api/movies/:category
@@ -305,6 +306,7 @@ export async function handleApiRequest(path: string, method: string, query: any,
         const page = Number(query.page) || 1;
 
         console.log(`[Handler] Category: ${category}, Page: ${page}`);
+
 
         const fetchFn = async (apiPage: number) => {
             if (category.startsWith('drama-box')) {
@@ -369,7 +371,6 @@ export async function handleApiRequest(path: string, method: string, query: any,
             return await fetchPagedData(page, fetchFn);
         } catch (e) {
             // Fallbacks
-            if (category === 'trending') return await fetchFromDramaBox('/dramas/trending', Number(page));
             if (category === 'short-tv' || category === 'indonesian-movies') return await fetchFromDramaBox('/dramas', Number(page));
             return await fetchFromBotraiki('/for-you', Number(page));
         }
@@ -380,10 +381,16 @@ export async function handleApiRequest(path: string, method: string, query: any,
         const q = query.q;
         const page = Number(query.page) || 1;
         if (!q) throw new Error("Query required");
+
+        // Search main API with Botraiki fallback
         try {
             const resp = await fetch(`${BASE_API_URL}?action=search&q=${encodeURIComponent(q)}&page=${page}`, { signal: AbortSignal.timeout(10000) });
             if (!resp.ok) throw new Error("Search failed");
-            return await resp.json();
+            const data = await resp.json();
+            if (data?.items) {
+                data.items = data.items.map((item: any) => ({ ...item, poster: cleanProxyUrl(item.poster) }));
+            }
+            return data;
         } catch (e) {
             return await fetchFromBotraiki(`/search?query=${encodeURIComponent(q)}`, page);
         }

@@ -15,7 +15,7 @@ import {
   Laugh,
   Globe,
   Mic2,
-  Star
+  Star,
 } from "lucide-react";
 export default function Home() {
   // ... (lines 8-105 remain unchanged)
@@ -55,9 +55,9 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSlider />
 
-      <div className="mt-[-100px] md:mt-[-160px] relative z-20 space-y-4 md:space-y-8">
-        {/* Categories */}
-        <div className="bg-gradient-to-t from-background via-background to-transparent pt-24 md:pt-32 space-y-2 md:space-y-6">
+      <div className="mt-[-100px] md:mt-[-160px] relative z-[45] space-y-2 md:space-y-4">
+        {/* Categories container with stronger gradient transition */}
+        <div className="bg-gradient-to-t from-background via-background/90 to-transparent pt-24 md:pt-32 space-y-0">
           {/* 1. Trending */}
           <CategoryRow
             title="Lagi Tren"
@@ -134,6 +134,7 @@ export default function Home() {
             isLoading={loadingDbGems}
             viewAllLink="/category/drama-box-hidden-gems"
           />
+
 
           <CategoryRow
             title="Short TV"

@@ -74,7 +74,7 @@ export function VideoPlayer({ url }: VideoPlayerProps) {
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-2xl shadow-black/50 ring-1 ring-white/10 group"
     >
