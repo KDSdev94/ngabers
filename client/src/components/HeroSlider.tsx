@@ -30,7 +30,7 @@ function HeroSlideItem({ movie }: { movie: MovieItem }) {
 
       {/* Content Layer - High Z-index to stay above the overlap section */}
       <div className="absolute inset-0 z-50 container mx-auto px-4 flex flex-col justify-end pb-20 md:pb-0 md:justify-center md:pt-32 pointer-events-auto">
-        <div className="max-w-2xl space-y-4 md:space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both">
+        <div className="hero-slide-content max-w-2xl space-y-4 md:space-y-6">
 
           {/* Badge Category */}
           <div className="flex items-center">
@@ -122,6 +122,7 @@ export function HeroSlider() {
       <Swiper
         modules={[Autoplay, EffectFade, Pagination]}
         effect="fade"
+        fadeEffect={{ crossFade: true }}
         speed={1000}
         autoplay={{ delay: 6000, disableOnInteraction: false }}
         allowTouchMove={false}
@@ -158,6 +159,25 @@ export function HeroSlider() {
           width: 24px;
           border-radius: 6px;
           box-shadow: 0 0 10px rgba(229, 25, 80, 0.5);
+        }
+
+        .swiper-fade .swiper-slide {
+          pointer-events: none;
+        }
+
+        .swiper-fade .swiper-slide-active {
+          pointer-events: auto;
+        }
+
+        .swiper-fade .swiper-slide .hero-slide-content {
+          opacity: 0;
+          transform: translateY(10px);
+          transition: opacity 280ms ease, transform 280ms ease;
+        }
+
+        .swiper-fade .swiper-slide-active .hero-slide-content {
+          opacity: 1;
+          transform: translateY(0);
         }
       `}</style>
     </div>
