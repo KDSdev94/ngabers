@@ -2,6 +2,8 @@ import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { api, buildUrl } from "@shared/routes";
 import { type ApiResponse, type MovieDetail, apiResponseSchema, movieDetailSchema } from "@shared/schema";
 
+const CATEGORY_CACHE_VERSION = "zeldvorik-v2";
+
 // Helper to fetch valid categories
 const fetchCategory = async (category: string, page = 1): Promise<ApiResponse> => {
   try {
@@ -54,7 +56,7 @@ export function useMoviesCategory(category: string) {
   const safeCategory = typeof category === 'string' ? category : 'trending';
 
   return useQuery({
-    queryKey: ["movies", "list", safeCategory],
+    queryKey: ["movies", "list", CATEGORY_CACHE_VERSION, safeCategory],
     queryFn: () => fetchCategory(safeCategory, 1),
     staleTime: 1000 * 60 * 5,
   });
@@ -65,7 +67,7 @@ export function useMoviesCategoryPaged(category: string, page: number) {
   const safeCategory = typeof category === 'string' ? category : 'trending';
 
   return useQuery({
-    queryKey: ["movies", "list", safeCategory, page],
+    queryKey: ["movies", "list", CATEGORY_CACHE_VERSION, safeCategory, page],
     queryFn: () => fetchCategory(safeCategory, page),
     staleTime: 1000 * 60 * 5,
   });
@@ -77,7 +79,7 @@ export function useInfiniteMoviesCategory(category: string) {
   const safeCategory = typeof category === 'string' ? category : 'trending';
 
   return useInfiniteQuery({
-    queryKey: ["movies", "list", "infinite", safeCategory],
+    queryKey: ["movies", "list", CATEGORY_CACHE_VERSION, "infinite", safeCategory],
     queryFn: ({ pageParam = 1 }) => fetchCategory(safeCategory, pageParam as number),
     initialPageParam: 1,
     getNextPageParam: (lastPage: ApiResponse) => {
@@ -91,7 +93,7 @@ export function useInfiniteMoviesCategory(category: string) {
 // Simple hook for single page (e.g., for hero slider)
 export function useTrendingMovies() {
   return useQuery({
-    queryKey: ["movies", "list", "trending"],
+    queryKey: ["movies", "list", CATEGORY_CACHE_VERSION, "trending"],
     queryFn: async () => {
       try {
         return await fetchCategory('trending', 1);

@@ -1,4 +1,4 @@
-const BASE_API_URL = "https://foodcash.com.br/sistema/apiv4/api.php";
+const BASE_API_URL = "https://zeldvorik.ru/apiv3/api.php";
 async function test() {
     console.log("Testing with limit=24...");
     const resp = await fetch(`${BASE_API_URL}?action=indonesian-movies&page=1&limit=24`);

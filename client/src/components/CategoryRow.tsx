@@ -24,7 +24,7 @@ export function CategoryRow({ title, items, isLoading, viewAllLink, icon }: Cate
 
   return (
     <section className="py-2 md:py-4 last:border-0 relative group/row">
-      <div className="container mx-auto px-4 mb-4 md:mb-6">
+      <div className="container mx-auto px-4 mb-2 md:mb-4">
         <div className="flex items-center justify-between gap-6 md:gap-10 mb-2 md:mb-3">
           <div className="flex-1 min-w-0 pr-4">
             <h2 className="text-lg md:text-2xl font-display font-bold text-white leading-tight flex items-center gap-2 md:gap-3">

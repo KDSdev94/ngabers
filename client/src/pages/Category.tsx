@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useParams, useLocation, Link } from "wouter";
 
 import { Navbar } from "@/components/Navbar";
@@ -18,7 +17,6 @@ import {
   Laugh,
   Globe,
   Mic2,
-  Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -33,9 +31,6 @@ const CATEGORY_TITLES: Record<string, string> = {
   "adult-comedy": "Yang hot-hot",
   "western-tv": "TV Barat",
   "indo-dub": "Dub Indo Terbaik!",
-  "drama-box": "Drama Box Specials",
-  "drama-box-must-sees": "Drama Box: Rekomendasi untukmu",
-  "drama-box-hidden-gems": "Drama Box: Hidden Gems",
 };
 
 // Helper to format category/genre slug to title
@@ -54,10 +49,8 @@ export default function Category() {
 
   // Get current page from URL or default to 1
   // We use location as a dependency to ensure rerender when query string changes
-  const currentPage = useMemo(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    return parseInt(searchParams.get("page") || "1", 10);
-  }, [window.location.search, location]);
+  const searchParams = new URLSearchParams(location.split("?")[1] || "");
+  const currentPage = parseInt(searchParams.get("page") || "1", 10);
 
   const categoryName = name || "trending";
   const { data, isLoading, isFetching } = useMoviesCategoryPaged(categoryName, currentPage);
@@ -134,7 +127,6 @@ export default function Category() {
     { id: "adult-comedy", label: "Canda Dewasa", icon: <Laugh className="w-4 h-4" /> },
     { id: "western-tv", label: "Western TV", icon: <Globe className="w-4 h-4" /> },
     { id: "indo-dub", label: "Indo Dub", icon: <Mic2 className="w-4 h-4" /> },
-    { id: "drama-box", label: "Drama Box", icon: <Star className="w-4 h-4" /> },
   ];
 
   return (
@@ -203,8 +195,8 @@ export default function Category() {
               exit={{ opacity: 0 }}
               className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-x-4 gap-y-8"
             >
-              {Array(18).fill(0).map((_, i) => (
-                <MovieCardSkeleton key={i} />
+              {Array.from({ length: 18 }, (_, num) => num + 1).map((skeletonId) => (
+                <MovieCardSkeleton key={`skeleton-${skeletonId}`} />
               ))}
             </motion.div>
           ) : (
@@ -238,4 +230,3 @@ export default function Category() {
     </div>
   );
 }
-

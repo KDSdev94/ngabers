@@ -4,8 +4,6 @@ import { CategoryRow } from "@/components/CategoryRow";
 import { Footer } from "@/components/Footer";
 import { useMoviesCategory } from "@/hooks/use-movies";
 import {
-  Clapperboard,
-  Gem,
   Flame,
   Film,
   Tv,
@@ -15,7 +13,6 @@ import {
   Laugh,
   Globe,
   Mic2,
-  Star,
 } from "lucide-react";
 export default function Home() {
   // ... (lines 8-105 remain unchanged)
@@ -37,15 +34,6 @@ export default function Home() {
     useMoviesCategory("western-tv");
   const { data: indoDub, isLoading: loadingIndoDub } =
     useMoviesCategory("indo-dub");
-  const { data: dramaBox, isLoading: loadingDramaBox } =
-    useMoviesCategory("drama-box-trending");
-  const { data: dbMustSees, isLoading: loadingDbMustSees } = useMoviesCategory(
-    "drama-box-must-sees",
-  );
-  const { data: dbGems, isLoading: loadingDbGems } = useMoviesCategory(
-    "drama-box-hidden-gems",
-  );
-
   const getItems = (data: any) => data?.items || [];
 
   return (
@@ -55,7 +43,7 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSlider />
 
-      <div className="mt-[-100px] md:mt-[-160px] relative z-[45] space-y-2 md:space-y-4">
+      <div className="mt-[-100px] md:mt-[-160px] relative z-[45] space-y-0 md:space-y-2">
         {/* Categories container with stronger gradient transition */}
         <div className="bg-gradient-to-t from-background via-background/90 to-transparent pt-24 md:pt-32 space-y-0">
           {/* 1. Trending */}
@@ -107,34 +95,6 @@ export default function Home() {
             isLoading={loadingIndoDub}
             viewAllLink="/category/indo-dub"
           />
-
-          {/* New Drama Box Category */}
-          <CategoryRow
-            title="Drama Box Specials"
-            icon={<Star className="w-5 h-5 md:w-6 md:h-6 fill-current" />}
-            items={getItems(dramaBox)}
-            isLoading={loadingDramaBox}
-            viewAllLink="/category/drama-box"
-          />
-
-          {/* Drama Box Must Sees */}
-          <CategoryRow
-            title="Drama Box: Rekomendasi untukmu"
-            icon={<Clapperboard className="w-5 h-5 md:w-6 md:h-6 fill-current" />}
-            items={getItems(dbMustSees)}
-            isLoading={loadingDbMustSees}
-            viewAllLink="/category/drama-box-must-sees"
-          />
-
-          {/* Drama Box Hidden Gems */}
-          <CategoryRow
-            title="Drama Box: Hidden Gems"
-            icon={<Gem className="w-5 h-5 md:w-6 md:h-6 fill-current" />}
-            items={getItems(dbGems)}
-            isLoading={loadingDbGems}
-            viewAllLink="/category/drama-box-hidden-gems"
-          />
-
 
           <CategoryRow
             title="Short TV"
